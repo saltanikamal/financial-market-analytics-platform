@@ -61,6 +61,6 @@ Tech Stack
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 - [System Architecture](docs/architecture.md)
