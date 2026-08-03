@@ -5,7 +5,7 @@ An end-to-end financial data science platform that automates market data collect
 
 ⸻
 
-Overview
+## Overview
 
 The Financial Market Analytics Platform is an end-to-end data science project designed to demonstrate the complete machine learning lifecycle using historical stock market data.
 
@@ -29,7 +29,7 @@ The dashboard provides interactive financial visualization including:
 
 ____
 
-Key Features
+## Key Features
 
 * Automated ETL pipeline for historical stock market data
 * PostgreSQL database for reliable data storage
@@ -42,8 +42,6 @@ Key Features
 * Modular architecture separating data, ML, backend, and frontend components
 
 ⸻
-
-Tech Stack
 
 ## Tech Stack
 
