@@ -11,6 +11,23 @@ An end-to-end financial data science platform that automates market data collect
 
 ⸻
 
+## Table of Contents
+
+- Overview
+- Dashboard
+- Features
+- System Architecture
+- Tech Stack
+- Project Structure
+- Machine Learning Pipeline
+- API
+- Installation
+- Running the Project
+- Documentation
+- Future Improvements
+
+____
+
 ## Overview
 
 The Financial Market Analytics Platform is an end-to-end data science project designed to demonstrate the complete machine learning lifecycle using historical stock market data.
