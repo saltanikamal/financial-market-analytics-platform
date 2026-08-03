@@ -35,3 +35,5 @@ The Financial Market Analytics Platform follows an end-to-end data science archi
           │
           ▼
  Interactive Charts & Predictions
+
+ 
