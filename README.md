@@ -1,4 +1,10 @@
 # financial-market-analytics-platform
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+![XGBoost](https://img.shields.io/badge/XGBoost-ML-orange)
+![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 Financial Market Analytics Platform
 
 An end-to-end financial data science platform that automates market data collection, feature engineering, machine learning, and interactive visualization.
