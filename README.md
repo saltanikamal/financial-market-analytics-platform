@@ -1,5 +1,5 @@
 # financial-market-analytics-platform
-📈 Financial Market Analytics Platform
+Financial Market Analytics Platform
 
 An end-to-end financial data science platform that automates market data collection, feature engineering, machine learning, and interactive visualization.
 
