@@ -7,24 +7,31 @@ The Financial Market Analytics Platform follows an end-to-end data science archi
 
 ## Architecture Flow
 
-```text
-Yahoo Finance API
-        |
-        v
-ETL Pipeline
-        |
-        v
-PostgreSQL Database
-        |
-        v
-Feature Engineering
-        |
-        v
-Machine Learning Models
-(XGBoost / Random Forest)
-        |
-        v
-FastAPI Backend
-        |
-        v
-Next.js Dashboard
+                    Yahoo Finance
+                         │
+                         ▼
+               ETL Data Ingestion
+            (yfinance + APScheduler)
+                         │
+                         ▼
+               PostgreSQL Database
+                         │
+          ┌──────────────┴──────────────┐
+          ▼                             ▼
+ Feature Engineering          Historical Market Data
+          │
+          ▼
+   Machine Learning Pipeline
+ (XGBoost / Random Forest)
+          │
+          ▼
+      Model Registry
+          │
+          ▼
+      FastAPI REST API
+          │
+          ▼
+     Next.js Dashboard
+          │
+          ▼
+ Interactive Charts & Predictions
