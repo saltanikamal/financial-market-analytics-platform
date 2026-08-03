@@ -6,23 +6,4 @@ The Financial Market Analytics Platform follows an end-to-end data science archi
 
 ## Architecture Flow
 
-Yahoo Finance API
-|
-v
-ETL Pipeline
-|
-v
-PostgreSQL Database
-|
-v
-Feature Engineering
-|
-v
-Machine Learning Models
-(XGBoost / Random Forest)
-|
-v
-FastAPI Backend
-|
-v
-Next.js Dashboard
+Yahoo Finance API -> ETL Pipeline -> PostgreSQL Database -> Feature Engineering -> Machine Learning Models (XGBoost / Random Forest) -> FastAPI Backend -> Next.js Dashboard
