@@ -15,6 +15,20 @@ Rather than focusing solely on building a prediction model, this project showcas
 
 ⸻
 
+## Dashboard Preview
+
+Coming soon.
+
+The dashboard provides interactive financial visualization including:
+
+- Candlestick charts
+- Moving averages
+- Technical indicators
+- Machine learning predictions
+- Market analytics
+
+____
+
 Key Features
 
 * Automated ETL pipeline for historical stock market data
@@ -31,13 +45,22 @@ Key Features
 
 Tech Stack
 
-Category	Technologies
-Programming	Python, TypeScript
-Data Processing	Pandas, NumPy
-Machine Learning	Scikit-learn, XGBoost
-Backend	FastAPI
-Frontend	Next.js, React
-Database	PostgreSQL
-Visualization	Lightweight Charts, Matplotlib
-Scheduling	APScheduler
-Version Control	Git, GitHub
+## Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Programming | Python, TypeScript |
+| Data Processing | Pandas, NumPy |
+| Machine Learning | Scikit-learn, XGBoost |
+| Backend | FastAPI |
+| Frontend | Next.js, React |
+| Database | PostgreSQL |
+| Visualization | Lightweight Charts, Matplotlib |
+| Scheduling | APScheduler |
+| Version Control | Git, GitHub |
+
+---
+
+## 📚 Documentation
+
+- [System Architecture](docs/architecture.md)
