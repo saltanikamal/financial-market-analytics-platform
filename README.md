@@ -40,15 +40,17 @@ Rather than focusing solely on building a prediction model, this project showcas
 
 ## Dashboard Preview
 
-Coming soon.
+## Dashboard
 
-The dashboard provides interactive financial visualization including:
+> Dashboard screenshots will be added after the UI is finalized.
 
-- Candlestick charts
-- Moving averages
+Features include:
+
+- Interactive candlestick charts
+- Buy/Hold/Sell predictions
 - Technical indicators
-- Machine learning predictions
-- Market analytics
+- Model confidence scores
+- Historical market analytics
 
 ____
 
