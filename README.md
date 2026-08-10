@@ -38,20 +38,15 @@ Rather than focusing solely on building a prediction model, this project showcas
 
 ⸻
 
-## Dashboard Preview
-
 ## Dashboard
 
-> Dashboard screenshots will be added after the UI is finalized.
+The interactive dashboard provides:
 
-Features include:
-
-- Interactive candlestick charts
-- Buy/Hold/Sell predictions
-- Technical indicators
+- Candlestick charts
+- Moving averages and technical indicators
+- BUY/HOLD/SELL predictions
 - Model confidence scores
 - Historical market analytics
-
 ____
 
 ## Key Features
