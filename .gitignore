@@ -1,27 +1,66 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyo
 
-# Virtual environment
+# Virtual environments
+.venv/
+venv/
 portfolio_venv/
 
-# Environment variables
+# Environment variables / secrets
 .env
+.env.*
+!.env.example
 
 # Jupyter
 .ipynb_checkpoints/
 
-# Node
-frontend/node_modules/
-frontend/.next/
-
-# OS files
-.DS_Store
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Logs
 *.log
+logs/
 
 # Model artifacts
 *.pkl
 *.joblib
+
+# =========================
+# Node / Next.js
+# =========================
+node_modules/
+.next/
+out/
+coverage/
+
+# Build artifacts
+build/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# macOS
+# =========================
+.DS_Store
+
+# =========================
+# Deployment
+# =========================
+.vercel/
+
+# Certificates / private keys
+*.pem
