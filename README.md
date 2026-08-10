@@ -86,4 +86,4 @@ ____
 
 ## Documentation
 
-- [System Architecture](docs/architecture.md)
+- [System Architecture](backend/docs/system-architecture.md)

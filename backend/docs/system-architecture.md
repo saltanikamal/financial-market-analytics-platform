@@ -19,6 +19,7 @@ flowchart TD
     E --> F[Model Registry]
     F --> G[FastAPI Backend]
     G --> H[Next.js Dashboard]
+```
 
 ---
 
@@ -244,6 +245,8 @@ flowchart TD
     E --> F[Model Registry]
     F --> G[Prediction API]
     G --> H[Interactive Dashboard]
+
+```
 
 ---
 
