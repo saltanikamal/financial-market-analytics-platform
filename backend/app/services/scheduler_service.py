@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
 
-WATCHLIST = ["SPY","QQQ","DIA","AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA"]
+WATCHLIST = ["AAPL", "MSFT", "NVDA", "SPY"]
 
 
 def ingest_all():
