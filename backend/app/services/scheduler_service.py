@@ -3,8 +3,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 import logging
 
 from app.services.yfinance_service import run_etl
-from app.ml.train import train_model
-
+from app.ml.train import train_model, MODELS
 logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
@@ -26,11 +25,18 @@ def retrain_models():
     logger.info("🧠 Training start")
 
     for symbol in WATCHLIST:
-        try:
-            train_model(symbol)
-        except Exception as e:
-            logger.error(f"Training failed {symbol}: {e}")
+        for model_name in MODELS:
+            try:
+                logger.info(
+                    f"Training {model_name} for {symbol}"
+                )
 
+                train_model(symbol, model_name)
+
+            except Exception as e:
+                logger.error(
+                    f"Training failed {symbol} {model_name}: {e}"
+                )
 
 def start_scheduler():
 
