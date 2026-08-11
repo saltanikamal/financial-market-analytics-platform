@@ -52,6 +52,7 @@ Prediction signals:
 - SELL
 
 ## Project Structure
+
 ```text
 frontend/
 ├── app/
@@ -65,10 +66,8 @@ frontend/
 ├── components/
 │   ├── charts/
 │   │   └── CandleChart.tsx
-│   ├── dashboard/
-│   │   └── Header.tsx
-│   ├── useMarketSocket.ts
-│   └── useMarketStream.ts
+│   └── dashboard/
+│       └── Header.tsx
 │
 ├── services/
 ├── types/
@@ -79,8 +78,4 @@ frontend/
 ├── package-lock.json
 ├── next.config.ts
 ├── tsconfig.json
-├── next-env.d.ts
-├── eslint.config.mjs
-├── postcss.config.mjs
 └── README.md
-
