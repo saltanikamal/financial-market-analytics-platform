@@ -5,9 +5,8 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
-    roc_auc_score
+    roc_auc_score,
 )
-
 
 
 def walk_forward_validation(
@@ -19,118 +18,64 @@ def walk_forward_validation(
     """
     Walk-forward validation for time-series classification.
 
-    Uses expanding window:
+    Uses an expanding training window.
 
-    Fold 1:
-        Train: first 344 rows
-        Test: next 172 rows
+    Example with 5 folds:
 
-    Fold 2:
-        Train: first 516 rows
-        Test: next 172 rows
+        Fold 1:
+            Train: first block
+            Test:  next block
 
-    ...
+        Fold 2:
+            Train: first two blocks
+            Test:  next block
 
-    Parameters:
-        model:
-            ML wrapper model
-            (XGBoostModel / RandomForestModel)
+        ...
 
-        X:
-            Feature dataframe
-
-        y:
-            Target series
-
-        folds:
-            Number of validation folds
-
+    No random shuffling is used.
 
     Returns:
-        Dictionary of validation metrics
+        Dictionary containing validation metrics.
     """
-
 
     total_rows = len(X)
 
-
     test_size = total_rows // (folds + 1)
 
-
-
     predictions = []
-
     actuals = []
+    probabilities = []
 
-
+    completed_folds = 0
 
     for fold in range(1, folds + 1):
 
+        print(f"\nFold {fold}")
 
-        print(
-            f"\nFold {fold}"
-        )
+        train_end = test_size * fold
 
-
-        train_end = (
-            test_size * fold
-        )
-
-
-        test_end = (
-            train_end + test_size
-        )
-
+        test_end = train_end + test_size
 
         if test_end > total_rows:
-
             break
 
+        X_train = X.iloc[:train_end]
+        y_train = y.iloc[:train_end]
 
+        X_test = X.iloc[train_end:test_end]
+        y_test = y.iloc[train_end:test_end]
 
-        X_train = X.iloc[
-            :train_end
-        ]
-
-
-        y_train = y.iloc[
-            :train_end
-        ]
-
-
-
-        X_test = X.iloc[
-            train_end:test_end
-        ]
-
-
-        y_test = y.iloc[
-            train_end:test_end
-        ]
-
-
-
-        print(
-            f"Train rows: {len(X_train)}"
-        )
-
-
-        print(
-            f"Test rows: {len(X_test)}"
-        )
-
-
+        print(f"Train rows: {len(X_train)}")
+        print(f"Test rows: {len(X_test)}")
 
         # ==========================
-        # TRAIN WRAPPER MODEL
+        # TRAIN
         # ==========================
 
         model.train(
             X_train,
             y_train
         )
-
-
 
         # ==========================
         # PREDICT
@@ -140,40 +85,50 @@ def walk_forward_validation(
             X_test
         )
 
-
-
         predictions.extend(
             y_pred
         )
-
 
         actuals.extend(
             y_test
         )
 
+        # ==========================
+        # PROBABILITIES
+        # ==========================
 
+        if hasattr(model.model, "predict_proba"):
+
+            fold_probabilities = model.model.predict_proba(
+                X_test
+            )
+
+            probabilities.extend(
+                fold_probabilities
+            )
+
+        completed_folds += 1
 
     # ==========================
-    # FINAL VALIDATION METRICS
+    # CONVERT TO ARRAYS
     # ==========================
-
 
     predictions = np.array(
         predictions
     )
 
-
     actuals = np.array(
         actuals
     )
 
-
+    # ==========================
+    # CLASSIFICATION METRICS
+    # ==========================
 
     accuracy = accuracy_score(
         actuals,
         predictions
     )
-
 
     precision = precision_score(
         actuals,
@@ -182,14 +137,12 @@ def walk_forward_validation(
         zero_division=0
     )
 
-
     recall = recall_score(
         actuals,
         predictions,
         average="weighted",
         zero_division=0
     )
-
 
     f1 = f1_score(
         actuals,
@@ -198,17 +151,19 @@ def walk_forward_validation(
         zero_division=0
     )
 
+    # ==========================
+    # ROC-AUC
+    # ==========================
 
+    roc_auc = 0.0
 
-    # ROC AUC for multiclass
-    try:
+    if len(probabilities) > 0:
 
-        if hasattr(model.model, "predict_proba"):
+        try:
 
-            probabilities = (
-                model.model.predict_proba(X.iloc[-len(actuals):])
+            probabilities = np.array(
+                probabilities
             )
-
 
             roc_auc = roc_auc_score(
                 actuals,
@@ -216,16 +171,17 @@ def walk_forward_validation(
                 multi_class="ovr"
             )
 
-        else:
+        except Exception as e:
+
+            print(
+                f"ROC-AUC calculation failed: {e}"
+            )
 
             roc_auc = 0.0
 
-
-    except Exception:
-
-        roc_auc = 0.0
-
-
+    # ==========================
+    # RESULTS
+    # ==========================
 
     results = {
 
@@ -258,19 +214,15 @@ def walk_forward_validation(
             "walk_forward",
 
         "folds":
-            folds - 1
-
+            completed_folds
     }
-
 
     print(
         "\nWalk-forward results"
     )
 
-
     print(
         results
     )
-
 
     return results

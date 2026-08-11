@@ -22,3 +22,6 @@ __pycache__/
 
 # Pytest cache
 .pytest_cache/
+
+# Trained ML model artifacts
+app/ml/models/latest/*.pkl
