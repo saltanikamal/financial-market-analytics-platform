@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,9 +11,21 @@ from app.api import (
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from app.services.scheduler_service import scheduler, start_scheduler
+
+    start_scheduler()
+
+    yield
+
+    if scheduler.running:
+        scheduler.shutdown()
+
 app = FastAPI(
     title="Financial Intelligence Platform",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
@@ -63,14 +77,12 @@ app.include_router(
 )
 
 
-
 # -------------------------------------------------
 # HEALTH CHECK
 # -------------------------------------------------
 
 @app.get("/")
 def root():
-
     return {
         "status": "ok",
         "application": "Financial Intelligence Platform",
