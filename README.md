@@ -9,7 +9,7 @@
 
 An end-to-end financial data science platform that automates market data collection, feature engineering, machine learning, and interactive visualization.
 
-⸻
+---
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ An end-to-end financial data science platform that automates market data collect
 - Documentation
 - Future Improvements
 
-____
+---
 
 ## Overview
 
@@ -36,7 +36,7 @@ The platform automatically collects market data, stores it in a PostgreSQL datab
 
 Rather than focusing solely on building a prediction model, this project showcases the integration of data engineering, machine learning, backend development, database management, and frontend visualization into a single production-style application.
 
-⸻
+---
 
 ## Dashboard
 
@@ -47,7 +47,7 @@ The interactive dashboard provides:
 - BUY/HOLD/SELL predictions
 - Model confidence scores
 - Historical market analytics
-____
+---
 
 ## Key Features
 
@@ -61,7 +61,7 @@ ____
 * Interactive Next.js dashboard with candlestick charts
 * Modular architecture separating data, ML, backend, and frontend components
 
-⸻
+---
 
 ## Tech Stack
 
@@ -82,3 +82,81 @@ ____
 ## Documentation
 
 - [System Architecture](backend/docs/system-architecture.md)
+
+---
+
+## Project Structure
+
+```text
+financial_platform_portfolio/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── ml/
+│   │   ├── services/
+│   │   └── main.py
+│   ├── docs/
+│   │   └── system-architecture.md
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   └── package.json
+│
+├── .gitignore
+└── README.md
+```
+---
+
+## Machine Learning Pipeline
+
+The machine learning workflow is designed for time-series financial data and includes:
+
+1. **Data Collection**
+   Historical market data is collected through the ETL pipeline and stored in PostgreSQL.
+
+2. **Feature Engineering**
+   Technical indicators, moving averages, momentum, volatility, lagged returns, and candlestick features are generated from historical price data.
+
+3. **Target Creation**
+   Future returns are used to classify market movement into three classes:
+   - BUY
+   - HOLD
+   - SELL
+
+4. **Model Training**
+   XGBoost and Random Forest classifiers are trained using engineered features.
+
+5. **Time-Series Validation**
+   Walk-forward validation is used to evaluate model performance while preserving the chronological order of financial data.
+
+6. **Model Registry**
+   Trained models and their metadata are versioned through the model registry.
+
+7. **Prediction**
+   The selected model generates market signals and probability estimates through the FastAPI prediction service.
+
+8. **Visualization**
+   Predictions, confidence scores, technical indicators, and historical prices are displayed through the Next.js dashboard.
+
+---
+
+## API
+
+The FastAPI backend provides REST endpoints for market data, analytics, ETL operations, and machine learning predictions.
+
+### REST Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | API health/root endpoint |
+| `/stocks` | GET | Retrieve available stock symbols |
+| `/etl/{symbol}` | GET | Trigger or access ETL processing for a stock symbol |
+| `/analytics/ohlc/{symbol}` | GET | Retrieve historical OHLC data and analytics |
+| `/predict/{symbol}` | GET | Generate a machine learning prediction for a stock |
+| `/predict/history/{symbol}` | GET | Retrieve prediction history |
+
+| Endpoint | Type | Description |
+|----------|------|-------------|
+| `/ws/market` | WebSocket | Stream market data updates |
