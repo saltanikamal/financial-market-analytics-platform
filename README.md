@@ -88,25 +88,39 @@ The interactive dashboard provides:
 ## Project Structure
 
 ```text
-financial_platform_portfolio/
+financial-market-analytics-platform/
+│
 ├── backend/
 │   ├── app/
 │   │   ├── api/
 │   │   ├── ml/
+│   │   │   ├── models/
+│   │   │   ├── registry/
+│   │   │   ├── data_loader.py
+│   │   │   ├── feature_engineering.py
+│   │   │   ├── feature_validator.py
+│   │   │   └── train.py
 │   │   ├── services/
+│   │   ├── ws/
 │   │   └── main.py
+│   │
 │   ├── docs/
 │   │   └── system-architecture.md
+│   │
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── app/
 │   ├── components/
-│   └── package.json
+│   ├── package.json
+│   └── ...
+│
+├── docs/
 │
 ├── .gitignore
-└── README.md
-```
+├── README.md
+└── ...
+
 ---
 
 ## Machine Learning Pipeline
