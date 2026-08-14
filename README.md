@@ -380,6 +380,7 @@ Endpoint	Type	Description
 
 ## Project Structure
 
+```text
 financial-market-analytics-platform/
 │
 ├── backend/
@@ -404,6 +405,7 @@ financial-market-analytics-platform/
 ├── frontend/
 │   ├── app/
 │   ├── components/
+│   ├── hooks/
 │   ├── package.json
 │   └── ...
 │
@@ -412,8 +414,9 @@ financial-market-analytics-platform/
 ├── .gitignore
 ├── README.md
 └── ...
+```
 
-⸻
+---
 
 ## Installation
 
