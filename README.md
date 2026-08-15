@@ -1,56 +1,46 @@
 # Financial Market Analytics Platform
 
-An end-to-end financial data science platform that combines data engineering, time-series feature engineering, machine learning, REST APIs, PostgreSQL, and interactive financial visualization into a production-style application.
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+![XGBoost](https://img.shields.io/badge/XGBoost-ML-orange)
+![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
 
-The platform collects historical market data, stores and processes it through an automated ETL pipeline, generates technical and statistical features, trains machine-learning models to classify future market movement, and exposes the results through a FastAPI backend and interactive Next.js dashboard.
+An end-to-end financial data science platform that combines data engineering, time-series analysis, feature engineering, machine learning, REST APIs, PostgreSQL, and interactive financial visualization into a production-style application.
 
-Portfolio project: This system is designed to demonstrate an end-to-end Data Science workflow. ML predictions are experimental and should not be interpreted as financial advice or as a standalone basis for investment decisions.
+The platform collects historical market data through an automated ETL pipeline, stores it in PostgreSQL, generates technical and statistical features, trains machine-learning classification models using chronological walk-forward validation, and exposes analytical results through a FastAPI backend and an interactive Next.js dashboard.
 
-⸻
-
-Table of Contents
-
-* ## Project Overview
-* ## Dashboard
-* ## Key Features
-* ## System Architecture
-* ## Tech Stack
-
-| Category | Technologies |
-|---|---|
-| Programming | Python, TypeScript |
-| Data Processing | Pandas, NumPy |
-| Machine Learning | Scikit-learn, XGBoost |
-| Backend | FastAPI, SQLAlchemy |
-| Database | PostgreSQL |
-| Frontend | Next.js, React |
-| Financial Visualization | Lightweight Charts |
-| Statistical Visualization | Matplotlib |
-| Scheduling | APScheduler |
-| Data Source | yfinance |
-| API Communication | REST, WebSocket |
-| Version Control | Git, GitHub |
+Portfolio project: Machine-learning predictions are experimental analytical signals and should not be interpreted as financial advice or used as a standalone basis for investment decisions.
 
 ---
 
-## Data Pipeline
-* ## Machine Learning Pipeline
-* ## Model Evaluation
-* ## API
-* ## Project Structure
-* ## Installation
-* ## Running the Project
-* ## Documentation
-* ## Limitations
-* ## Future Improvements
+## Table of Contents
 
-⸻
+- [Project Overview](#project-overview)
+- [Dashboard](#dashboard)
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [Technology Stack](#technology-stack)
+- [Data Pipeline](#data-pipeline)
+- [Machine Learning Pipeline](#machine-learning-pipeline)
+- [Model Evaluation](#model-evaluation)
+- [API](#api)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Running the Project](#running-the-project)
+- [Documentation](#documentation)
+- [Limitations](#limitations)
+- [Future Improvements](#future-improvements)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Author](#author)
+
+---
 
 ## Project Overview
 
-Financial market data is time-dependent, noisy, and highly sensitive to changes in market conditions. A machine-learning model that performs well on historical data may fail when applied to future or unseen market periods.
+Financial market data is time-dependent, noisy, and highly sensitive to changing market conditions. A machine-learning model that performs well on historical data may fail when applied to future or unseen market periods.
 
-This project was built to explore that problem through a complete data science pipeline.
+This project was built to explore that problem through a complete data science and software engineering workflow.
 
 The platform:
 
@@ -58,96 +48,122 @@ The platform:
 2. Stores market data in PostgreSQL.
 3. Performs data validation and preprocessing.
 4. Generates technical and statistical features.
-5. Creates future-return-based BUY/HOLD/SELL targets.
+5. Creates future-return-based BUY, HOLD, and SELL targets.
 6. Trains machine-learning classification models.
 7. Evaluates models using chronological walk-forward validation.
 8. Registers trained models and their metadata.
 9. Serves predictions through a FastAPI API.
 10. Visualizes market data and model outputs through a Next.js dashboard.
 
-The project therefore goes beyond a standalone notebook or prediction model and demonstrates how a data science model can be integrated into a complete application.
+The current watchlist includes:
 
-⸻
+* AAPL — Apple
+* MSFT — Microsoft
+* NVDA — NVIDIA
+* SPY — SPDR S&P 500 ETF
+
+---
 
 ## Dashboard
 
-The Next.js dashboard provides an interactive interface for exploring historical market behavior and model outputs.
+The Next.js dashboard provides an interactive interface for exploring historical market behavior, technical indicators, and machine-learning signals.
 
-Dashboard Capabilities
+### Market Visualization
 
 * Interactive candlestick charts
-* Historical OHLC price data
+* Historical OHLC price analysis
 * Moving-average overlays
-* Technical indicators
+* Multi-symbol analysis
+* Visual representation of market trends
+
+### Machine-Learning Insights
+
 * BUY / HOLD / SELL market signals
-* Machine-learning predictions
-* Prediction probabilities
-* Model confidence information
-* Historical market analytics
-* Real-time market-data WebSocket infrastructure
+* Machine-learning prediction output
+* Prediction probability
+* Model confidence
+* Current market price
 
-Dashboard Preview
+### Real-Time Updates
 
-Screenshots will be added after the final dashboard visual polish.
+The dashboard communicates with the FastAPI backend through REST endpoints to retrieve market data, analytics, and machine-learning predictions.
 
-⸻
+### Supported Symbols
+
+* AAPL — Apple
+* MSFT — Microsoft
+* NVDA — NVIDIA
+* SPY — SPDR S&P 500 ETF
+
+---
 
 ## Key Features
 
-Data Engineering
+### Market Data Engineering
 
-* Automated market-data ingestion
-* ETL pipeline using historical stock-market data
+* Automated market-data ingestion using yfinance
+* Scheduled data collection using APScheduler
+* Historical OHLCV data storage
 * PostgreSQL persistence
-* Duplicate detection
-* Data validation
-* Scheduled data updates
-* Support for multiple market symbols
+* Data validation and preprocessing
+* Multi-symbol support
 
-Feature Engineering
+### Technical Feature Engineering
 
-The platform generates financial and statistical features including:
+The feature-engineering pipeline generates indicators and market features including:
 
-* Moving averages
+* Simple moving averages
 * Exponential moving averages
 * RSI
 * MACD
 * Bollinger Bands
 * Momentum
-* Daily returns
-* Lagged returns
-* Rolling volatility
+* Volatility
 * Volume changes
-* Trend strength
 * Candlestick features
 
-Machine Learning
+### Machine Learning
+
+The platform currently supports:
 
 * XGBoost classification
 * Random Forest classification
-* Multiclass BUY / HOLD / SELL prediction
-* Probability estimates
-* Model registry
+* BUY / HOLD / SELL prediction
+* Prediction probabilities
+* Confidence scoring
 * Model versioning
-* Walk-forward time-series validation
+* Model registry
 
-Backend
+### Time-Series Validation
 
-* FastAPI REST API
-* WebSocket market-data infrastructure
-* SQLAlchemy database integration
-* Scheduled ETL and model operations
-* Modular backend architecture
+Financial data cannot be evaluated like ordinary independent observations.
 
-Frontend
+The project therefore uses chronological walk-forward validation, where models are trained on earlier observations and evaluated on later unseen periods.
 
-* Next.js
-* React
-* Interactive financial charts
-* Lightweight Charts
-* Market analytics dashboard
+This helps reduce the risk of unrealistic evaluation caused by randomly mixing historical and future observations.
 
-⸻
+### Backend API
+
+The FastAPI backend provides services for:
+
+* Market data
+* OHLC data
+* Analytics
+* Machine-learning predictions
+* Market signals
+
+Interactive Frontend
+
+The Next.js dashboard provides a visual interface for:
+
+* Price movements
+* Candlestick patterns
+* Technical indicators
+* Market signals
+* Machine-learning predictions
+* Prediction confidence
+
+---
 
 ## System Architecture
 
@@ -157,226 +173,214 @@ The platform is organized as an end-to-end data engineering, machine-learning, b
 
 ```mermaid
 flowchart LR
-    A[Yahoo Finance] --> B[ETL Pipeline]
+    A[Yahoo Finance] --> B[ETL + Scheduler]
     B --> C[PostgreSQL]
-    C --> D[Feature Engineering]
-    D --> E[ML Training]
-    E --> F[Model Registry]
-    F --> G[FastAPI Backend]
-    G --> H[Next.js Dashboard]
-    G --> I[WebSocket Market Stream]
-    H --> J[Interactive Charts]
-    H --> K[Market Signals]
-    H --> L[ML Predictions]
+
+    C --> D[ML Pipeline]
+    D --> E[Model Registry]
+
+    C --> F[FastAPI]
+    E --> F
+
+    F --> G[Next.js Dashboard]
+    G --> H[Interactive Charts]
+    G --> I[Market Signals]
+    G --> J[ML Predictions]
 ```
 
-## Tech Stack
+### Machine-Learning Training Flow
 
-| Category | Technologies |
+```mermaid
+flowchart LR
+    A[PostgreSQL] --> B[Data Loader]
+    B --> C[Feature Engineering]
+    C --> D[Chronological Split]
+    D --> E[XGBoost / Random Forest]
+    E --> F[Walk-Forward Validation]
+    F --> G[Model Registry]
+    G --> H[Prediction Service]
+```
+
+### End-to-End Workflow
+
+The platform separates data ingestion, model development, and prediction serving into distinct stages:
+
+1. Market Data Collection — Market data is retrieved from Yahoo Finance.
+2. ETL Processing — Data is validated, transformed, and stored in PostgreSQL.
+3. Feature Engineering — Historical OHLCV data is transformed into technical and statistical features.
+4. Model Training and Validation — Machine-learning models are evaluated using chronological walk-forward validation.
+5. Model Registry — Trained models and metadata are registered for prediction.
+6. Prediction Serving — FastAPI loads the registered model and exposes prediction endpoints.
+7. Dashboard Visualization — Next.js consumes the backend services and presents market data and model outputs interactively.
+---
+
+## Technology Stack
+
+| Layer | Technology |
 |---|---|
-| Programming | Python, TypeScript |
+| Programming | Python 3.12 |
 | Data Processing | Pandas, NumPy |
-| Machine Learning | Scikit-learn, XGBoost |
-| Backend | FastAPI, SQLAlchemy |
+| Machine Learning | scikit-learn, XGBoost |
+| Data Source | Yahoo Finance |
 | Database | PostgreSQL |
-| Frontend | Next.js, React |
-| Financial Visualization | Lightweight Charts |
-| Statistical Visualization | Matplotlib |
+| Backend | FastAPI |
 | Scheduling | APScheduler |
-| Data Source | yfinance |
-| API Communication | REST, WebSocket |
-| Version Control | Git, GitHub |
-
+| Frontend | Next.js, React, TypeScript |
+| Financial Charts | Lightweight Charts |
+| API Communication | REST |
+| Environment | Python virtual environment |
+| Version Control | Git / GitHub |
 ---
 
 ## Data Pipeline
 
-## Data Pipeline
+The data pipeline is responsible for collecting, validating, transforming, and storing market data.
 
-The data pipeline follows an automated ETL workflow.
+### Pipeline Flow
 
-1. Extract
+```text
+Yahoo Finance
+      │
+      ▼
+Data Ingestion
+      │
+      ▼
+Validation
+      │
+      ▼
+Transformation
+      │
+      ▼
+PostgreSQL
+      │
+      ▼
+Feature Engineering
+```
 
-Historical market data is collected for supported stock symbols.
+### ETL Responsibilities
 
-Current dashboard/watchlist symbols include:
+The ETL process:
 
-AAPL
-MSFT
-NVDA
-SPY
+1. Retrieves market data.
+2. Normalizes the data structure.
+3. Validates required fields.
+4. Identifies duplicate observations.
+5. Processes historical and newly available observations.
+6. Stores valid records in PostgreSQL.
+7. Supports scheduled data updates.
 
-2. Transform
+The scheduler automates recurring ingestion so that the platform can maintain an up-to-date market dataset.
 
-Raw market data is processed and transformed into a structured dataset containing:
-
-* Open
-* High
-* Low
-* Close
-* Volume
-* Returns
-* Technical indicators
-* Rolling statistics
-* Lagged features
-* Candlestick features
-
-3. Load
-
-Processed market data is stored in PostgreSQL.
-
-The database provides persistent storage that can be queried by both the analytics and machine-learning components.
-
-4. Scheduling
-
-APScheduler is used to automate recurring data and model-related tasks.
-
-⸻
+---
 
 ## Machine Learning Pipeline
 
-The machine-learning workflow is specifically designed for chronological financial data.
+The machine-learning workflow transforms historical market observations into predictive features and classification targets.
 
-1. Historical Data
+### Feature Engineering
+```
 
-Market data is retrieved from PostgreSQL rather than repeatedly training directly from an external source.
+Raw OHLCV data is transformed into features such as:
 
-2. Feature Engineering
+- Moving Averages
+- EMA12 / EMA26
+- RSI
+- MACD
+- Bollinger Bands
+- Momentum
+- Volatility
+- Volume Change
+- Candlestick Features
 
-Technical and statistical features are generated from historical observations.
+### Prediction Target
 
-Examples include:
+The model predicts future market movement over a predefined prediction horizon.
 
-MA7
-MA20
-MA50
-MA100
-MA200
-EMA12
-EMA26
-RSI
-MACD
-Bollinger Bands
-Momentum
-Volatility
-Lagged Returns
-Volume Change
-Candlestick Features
+The target is represented as three classes:
 
-3. Target Creation
+| Class | Signal |
+|---:|---|
+| 0 | SELL |
+| 1 | HOLD |
+| 2 | BUY |
 
-The model predicts future market movement over a defined prediction horizon.
+The classification target is derived from future returns rather than directly predicting the future stock price.
 
-Future returns are converted into three classes:
+### Model Training
 
-SELL
-HOLD
-BUY
-
-The classification thresholds are based on future returns rather than simply predicting whether the next closing price is higher or lower.
-
-4. Model Training
-
-The platform currently supports:
+The project currently uses:
 
 * XGBoost
 * Random Forest
 
-5. Walk-Forward Validation
+Models are trained using historical observations and evaluated using chronological walk-forward validation.
 
-Traditional random train/test splitting is inappropriate for time-series financial data because it can allow information from the future to influence the training process.
+### Model Registry
 
-The platform therefore uses walk-forward validation.
+Trained models are versioned and registered with associated metadata.
 
-Conceptually:
+This provides a structured mechanism for identifying the model used for a particular prediction and supports future model-selection improvements.
 
-Fold 1:
-TRAIN ──────────────► TEST
-Fold 2:
-TRAIN ─────────────────────► TEST
-Fold 3:
-TRAIN ───────────────────────────► TEST
-Fold 4:
-TRAIN ─────────────────────────────────► TEST
-
-Each training set contains only information available before its corresponding test period.
-
-This provides a more realistic evaluation of how the model may behave on future data.
-
-6. Model Registry
-
-Trained models are versioned and stored with metadata such as:
-
-* Model type
-* Symbol
-* Training timestamp
-* Feature information
-* Evaluation metrics
-* Model version
-
-The registry allows the prediction service to select an appropriate trained model.
-
-7. Prediction
-
-The prediction service generates:
-
-* BUY / HOLD / SELL signal
-* Class probabilities
-* Confidence information
-* Model metadata
-
-These results are exposed through the FastAPI backend.
-
-⸻
+---
 
 ## Model Evaluation
 
-Because financial prediction is a difficult and noisy problem, model evaluation is an important part of this project.
+Model evaluation is performed using chronological walk-forward validation.
 
-The walk-forward validation process produced results in the following range during development:
+Instead of randomly splitting financial observations, the data is divided into sequential training and testing periods.
 
-Metric	Result
-Accuracy	~0.26–0.33
-Precision	~0.17–0.32
-Recall	~0.26–0.33
-F1 Score	~0.13–0.29
-ROC-AUC	~0.50
+Conceptually:
 
-These results indicate that the current model does not demonstrate strong predictive power and should not be treated as a profitable trading strategy.
+Training Data 1 ─────► Test 1
+Training Data 1 + 2 ─────────► Test 2
+Training Data 1 + 2 + 3 ─────────────► Test 3
 
-This is an intentional part of the project.
+This better reflects the real-world scenario in which a model learns from historical data and then makes predictions on future observations.
 
-The objective is not to claim that machine learning can reliably predict financial markets. Instead, the project demonstrates how to:
+### Evaluation Metrics
 
-* Build a financial ML pipeline
-* Avoid inappropriate random splitting
-* Apply time-series validation
-* Track model versions
-* Expose predictions through an API
-* Evaluate model limitations honestly
+The project evaluates classification performance using multiple complementary metrics:
 
-⸻
+| Metric | Result |
+|---|---:|
+| Accuracy | 0.2596 |
+| Precision | 0.1724 |
+| Recall | 0.2596 |
+| F1 Score | 0.1328 |
+| ROC-AUC | 0.4954 |
+
+### Interpretation
+
+The current validation results indicate that the models have limited predictive power on unseen market periods. The ROC-AUC score is close to 0.50, suggesting performance near random classification, while the relatively low F1 score indicates difficulty consistently identifying the three market-movement classes.
+
+These results are treated as an experimental baseline rather than evidence of a production-ready investment strategy.
+
+---
 
 ## API
 
-The FastAPI backend provides services for market data, analytics, ETL operations, and machine-learning predictions.
+The backend is implemented using FastAPI.
 
-REST Endpoints
+The API provides access to market data, analytics, and machine-learning predictions.
 
-Endpoint	Method	Description
-/	GET	API health/root endpoint
-/stocks	GET	Retrieve available stock symbols
-/etl/{symbol}	GET	Trigger/access ETL processing
-/analytics/ohlc/{symbol}	GET	Retrieve historical OHLC data and analytics
-/predict/{symbol}	GET	Generate a machine-learning prediction
-/predict/history/{symbol}	GET	Retrieve prediction history
+### Core API Capabilities
 
-WebSocket
+The FastAPI backend provides services for:
 
-Endpoint	Type	Description
-/ws/market	WebSocket	Stream market-data updates
+- Historical market data
+- OHLC price data
+- Technical analytics
+- Market signals
+- Machine-learning predictions
 
-⸻
+### API Documentation
+
+When the backend is running, FastAPI provides interactive API documentation through:
+
+http://127.0.0.1:8000/docs
+
+
+---
 
 ## Project Structure
 
@@ -386,202 +390,226 @@ financial-market-analytics-platform/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── analytics.py
+│   │   │   ├── etl.py
+│   │   │   ├── predictions.py
+│   │   │   └── stocks.py
+│   │   │
+│   │   ├── database/
+│   │   │   ├── base.py
+│   │   │   └── connection.py
+│   │   │
 │   │   ├── ml/
-│   │   │   ├── models/
+│   │   │   ├── algorithms/
+│   │   │   ├── core/
+│   │   │   ├── evaluation/
 │   │   │   ├── registry/
 │   │   │   ├── data_loader.py
 │   │   │   ├── feature_engineering.py
 │   │   │   ├── feature_validator.py
+│   │   │   ├── predictor.py
 │   │   │   └── train.py
+│   │   │
+│   │   ├── models/
+│   │   ├── schemas/
 │   │   ├── services/
-│   │   ├── ws/
+│   │   ├── config.py
 │   │   └── main.py
 │   │
-│   ├── docs/
-│   │   └── system-architecture.md
-│   │
-│   └── requirements.txt
+│   ├── init_db.py
+│   ├── requirements.txt
+│   └── README.md
 │
 ├── frontend/
 │   ├── app/
+│   │   ├── dashboard/
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
 │   ├── components/
-│   ├── hooks/
+│   │   ├── charts/
+│   │   └── dashboard/
+│   ├── services/
+│   ├── public/
 │   ├── package.json
-│   └── ...
+│   └── README.md
 │
 ├── docs/
+│   └── architecture.md
 │
-├── .gitignore
 ├── README.md
-└── ...
+└── .gitignore
 ```
 
----
+The repository is organized into separate backend, frontend, and documentation layers. The backend contains the API, database, machine-learning, model, schema, and service components, while the frontend contains the Next.js application and reusable visualization components.
 
 ## Installation
 
-1. Clone the Repository
+1. Clone the repository
 
 git clone https://github.com/saltanikamal/financial-market-analytics-platform.git
 cd financial-market-analytics-platform
 
-2. Create the Python Environment
+2. Create and activate the Python environment
 
 python3 -m venv portfolio_venv
 source portfolio_venv/bin/activate
 
-3. Install Backend Dependencies
+3. Install backend dependencies
 
-cd backend
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
-4. Configure PostgreSQL
-
-Create a PostgreSQL database and configure the required database connection variables in the backend environment configuration.
-
-Example:
-
-DATABASE_URL=postgresql://username:password@localhost:5432/stockdb
-
-5. Install Frontend Dependencies
-
-From the project root:
+4. Install frontend dependencies
 
 cd frontend
 npm install
+cd ..
 
-⸻
+5. Configure PostgreSQL
+
+Create the required PostgreSQL database and configure the database connection used by the backend.
+
+---
 
 ## Running the Project
 
-Start PostgreSQL
+The application consists of a FastAPI backend and a Next.js frontend.
 
-Ensure PostgreSQL is running and the configured database is available.
+Start the backend
 
-Start the FastAPI Backend
+From the project root:
 
-From the backend directory:
-
+source portfolio_venv/bin/activate
+cd backend
 uvicorn app.main:app --reload
 
-The API will be available at:
+The backend will be available at:
 
 http://127.0.0.1:8000
 
-FastAPI interactive documentation:
+Interactive API documentation:
 
 http://127.0.0.1:8000/docs
 
-Start the Next.js Frontend
+Start the frontend
 
-From the frontend directory:
+Open another terminal:
 
+cd frontend
 npm run dev
 
 The dashboard will be available at:
 
 http://localhost:3000
 
-⸻
+---
 
 ## Documentation
 
-Additional technical documentation:
+Additional project documentation is available in:
 
-- Backend documentation
-- System architecture
-- Frontend documentation — coming next
-- Architecture diagram — coming next
-- Dashboard screenshots — coming next
-⸻
+backend/README.md
+frontend/README.md
+docs/
+
+The documentation covers the backend, frontend, data pipeline, machine-learning workflow, and project architecture.
+
+---
 
 ## Limitations
 
-Financial markets are highly complex, noisy, and non-stationary.
+Financial markets are inherently difficult to model.
 
-The current system has several limitations:
+The current system has several important limitations:
 
-* Model predictive performance is currently weak.
-* Historical performance does not guarantee future performance.
-* The model does not incorporate all macroeconomic, fundamental, or geopolitical information.
-* Confidence scores represent model probabilities and should not be interpreted as certainty.
-* The current system is not a fully backtested trading strategy.
+* Historical patterns may not persist into future market conditions.
+* Technical indicators do not capture all market information.
+* Market behavior can change because of macroeconomic, geopolitical, and unexpected events.
+* Classification performance is currently experimental.
+* Prediction confidence should not be interpreted as probability of investment success.
+* The system does not constitute a validated trading strategy.
 * Transaction costs, slippage, liquidity, and portfolio risk management are not fully modeled.
-* The platform should not be used as an autonomous investment system.
 
-These limitations are important because a model can produce a prediction without necessarily providing a useful or profitable trading signal.
+The platform should therefore be viewed as a data science and machine-learning research project, not as an automated investment system.
 
-⸻
+---
 
 ## Future Improvements
 
-Machine Learning
+Potential future improvements include:
 
-* Improve feature selection
-* Address class imbalance
-* Experiment with additional models
-* Improve probability calibration
-* Compare model performance across market regimes
-* Investigate sequence-based models such as LSTM
-* Improve model-selection logic
+* Improved feature engineering
+* Additional market and macroeconomic features
+* More robust model-selection strategies
+* Expanded walk-forward validation
+* Hyperparameter optimization
+* Model performance monitoring
+* Backtesting and transaction-cost modeling
+* Portfolio-level risk analysis
+* Improved confidence calibration
+* Additional financial instruments
+* Advanced deep-learning models such as LSTM
+* Cloud deployment
+* Automated model retraining and monitoring
+* Enhanced dashboard visualization
 
-Validation
+---
 
-* Expand walk-forward validation
-* Add benchmark models
-* Add trading-strategy backtesting
-* Evaluate performance across different market regimes
-* Add statistical significance testing
+## Skills Demonstrated
 
-Platform
-
-* Improve dashboard visual design
-* Add portfolio and risk analytics
-* Add model-performance monitoring
-* Improve real-time market-data processing
-* Add automated model-retraining monitoring
-
-Cloud Deployment
-
-Potential future deployment architecture:
-
-AWS
- │
- ├── Backend API
- ├── PostgreSQL
- ├── Scheduled ETL
- ├── ML Training
- ├── Model Storage
- └── Frontend Hosting
-
-⸻
-
-## Project Goal
-
-The primary goal of this project is to demonstrate the ability to take a data-science problem from raw data to a working application.
-
-It combines:
+This project demonstrates practical experience across the full data science lifecycle:
 
 Data Engineering
-       ↓
-Data Storage
-       ↓
-Feature Engineering
-       ↓
-Machine Learning
-       ↓
-Time-Series Validation
-       ↓
-Model Registry
-       ↓
-API Development
-       ↓
-Interactive Visualization
 
-The project emphasizes not only model development, but also data quality, validation methodology, software architecture, reproducibility, and communication of model limitations.
+* ETL
+* Data validation
+* PostgreSQL
+* Scheduled pipelines
 
-⸻
+Data Science
 
-## License
+* Exploratory analysis
+* Time-series feature engineering
+* Technical indicators
+* Statistical reasoning
 
-This project is licensed under the MIT License.
+### Machine Learning
+
+* Classification
+* XGBoost
+* Random Forest
+* Model evaluation
+* Walk-forward validation
+* Model versioning
+
+Software Engineering
+
+* Python
+* FastAPI
+* REST APIs
+* Modular project architecture
+
+Frontend Development
+
+* Next.js
+* React
+* TypeScript
+* Interactive financial visualization
+
+Development & Deployment Practices
+
+* Git
+* GitHub
+* Virtual environments
+* API documentation
+* Production-style application architecture
+
+---
+
+## Author
+
+Kamal Saltani
+
+Data Scientist | Machine Learning | Data Engineering | Financial Analytics
+
+[GitHub](https://github.com/saltanikamal)
