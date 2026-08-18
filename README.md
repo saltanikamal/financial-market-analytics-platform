@@ -169,7 +169,6 @@ The Next.js dashboard provides a visual interface for:
 * Prediction confidence
 
 ---
-
 ## System Architecture
 
 The platform is organized as an end-to-end data engineering, machine-learning, backend, and frontend system.
@@ -178,47 +177,20 @@ The platform is organized as an end-to-end data engineering, machine-learning, b
 
 ```mermaid
 flowchart LR
-    A[Yahoo Finance] --> B[ETL + Scheduler]
+    A[Yahoo Finance] --> B[ETL Pipeline]
     B --> C[PostgreSQL]
 
-    C --> D[ML Pipeline]
-    D --> E[Model Registry]
+    C --> D[Feature Engineering]
+    D --> E[ML Training]
+    E --> F[Model Registry]
 
-    C --> F[FastAPI]
-    E --> F
+    C --> G[FastAPI Backend]
+    F --> G
 
-    F --> G[Next.js Dashboard]
-    G --> H[Interactive Charts]
-    G --> I[Market Signals]
-    G --> J[ML Predictions]
-```
-
-### Machine-Learning Training Flow
-
-```mermaid
-flowchart LR
-    A[PostgreSQL] --> B[Data Loader]
-    B --> C[Feature Engineering]
-    C --> D[Chronological Split]
-    D --> E[XGBoost / Random Forest]
-    E --> F[Walk-Forward Validation]
-    F --> G[Model Registry]
-    G --> H[Prediction Service]
-```
-
-### End-to-End Workflow
-
-The platform separates data ingestion, model development, and prediction serving into distinct stages:
-
-1. Market Data Collection — Market data is retrieved from Yahoo Finance.
-2. ETL Processing — Data is validated, transformed, and stored in PostgreSQL.
-3. Feature Engineering — Historical OHLCV data is transformed into technical and statistical features.
-4. Model Training and Validation — Machine-learning models are evaluated using chronological walk-forward validation.
-5. Model Registry — Trained models and metadata are registered for prediction.
-6. Prediction Serving — FastAPI loads the registered model and exposes prediction endpoints.
-7. Dashboard Visualization — Next.js consumes the backend services and presents market data and model outputs interactively.
----
-
+    G --> H[Next.js Dashboard]
+    H --> I[Interactive Charts]
+    H --> J[Market Signals]
+    H --> K[ML Predictions]
 ## Technology Stack
 
 | Layer | Technology |
