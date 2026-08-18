@@ -201,7 +201,6 @@ flowchart LR
 
     H --> K[ML Predictions]
 ```
-
  ## Technology Stack
 
 | Layer | Technology |
