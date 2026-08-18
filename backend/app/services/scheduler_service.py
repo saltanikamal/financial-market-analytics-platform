@@ -1,49 +1,117 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-import logging
 
 from app.services.yfinance_service import run_etl
-from app.ml.train import train_model, MODELS
-logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# STOCK UNIVERSE
+# ============================================================
+
+WATCHLIST = [
+    "AAPL",
+    "AMD",
+    "AMZN",
+    "AVGO",
+    "BAC",
+    "CAT",
+    "COST",
+    "CVX",
+    "DIA",
+    "GE",
+    "GOOGL",
+    "GS",
+    "HD",
+    "JNJ",
+    "JPM",
+    "LLY",
+    "MA",
+    "META",
+    "MS",
+    "MSFT",
+    "NFLX",
+    "NVDA",
+    "ORCL",
+    "QQQ",
+    "SPY",
+    "TSLA",
+    "UNH",
+    "V",
+    "WMT",
+    "XOM",
+]
+
+
+# ============================================================
+# SCHEDULER
+# ============================================================
 
 scheduler = BackgroundScheduler()
 
-WATCHLIST = ["AAPL", "MSFT", "NVDA", "SPY"]
+
+# ============================================================
+# ETL JOB
+# ============================================================
+
+def scheduled_etl():
+    """
+    Run the complete 5-year ETL pipeline
+    for the entire stock universe.
+    """
+
+    print(
+        "\nStarting scheduled market-data ETL..."
+    )
+
+    run_etl(
+        symbols=WATCHLIST,
+        period="5y",
+    )
 
 
-def ingest_all():
-    logger.info("🔄 ETL start")
-
-    for symbol in WATCHLIST:
-        try:
-            run_etl(symbol)
-        except Exception as e:
-            logger.error(f"ETL failed {symbol}: {e}")
-
-
-def retrain_models():
-    logger.info("🧠 Training start")
-
-    for symbol in WATCHLIST:
-        for model_name in MODELS:
-            try:
-                logger.info(
-                    f"Training {model_name} for {symbol}"
-                )
-
-                train_model(symbol, model_name)
-
-            except Exception as e:
-                logger.error(
-                    f"Training failed {symbol} {model_name}: {e}"
-                )
+# ============================================================
+# START SCHEDULER
+# ============================================================
 
 def start_scheduler():
 
     if scheduler.running:
+
+        print(
+            "Scheduler already running."
+        )
+
         return
 
-    scheduler.add_job(ingest_all, IntervalTrigger(hours=1), id="etl")
-    scheduler.add_job(retrain_models, IntervalTrigger(hours=24), id="train")
+    scheduler.add_job(
+        scheduled_etl,
+        trigger="interval",
+        hours=1,
+        id="market_data_etl",
+        replace_existing=True,
+        max_instances=1,
+    )
 
     scheduler.start()
+
+    print(
+        "Market-data scheduler started."
+    )
+
+    print(
+        f"Watching {len(WATCHLIST)} stocks."
+    )
+
+
+# ============================================================
+# STOP SCHEDULER
+# ============================================================
+
+def stop_scheduler():
+
+    if scheduler.running:
+
+        scheduler.shutdown()
+
+        print(
+            "Market-data scheduler stopped."
+        )
