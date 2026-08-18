@@ -55,9 +55,41 @@ The platform:
 9. Serves predictions through a FastAPI API.
 10. Visualizes market data and model outputs through a Next.js dashboard.
 
-The current watchlist includes:
+The current market universe includes 30 stocks and ETFs:
 
 The current market universe includes 30 stocks and ETFs.
+| Symbol | Company / Instrument |
+|---|---|
+| AAPL | Apple |
+| AMD | Advanced Micro Devices |
+| AMZN | Amazon |
+| AVGO | Broadcom |
+| BAC | Bank of America |
+| CAT | Caterpillar |
+| COST | Costco |
+| CVX | Chevron |
+| DIA | SPDR Dow Jones Industrial Average ETF |
+| GE | GE Aerospace |
+| GOOGL | Alphabet |
+| GS | Goldman Sachs |
+| HD | Home Depot |
+| JNJ | Johnson & Johnson |
+| JPM | JPMorgan Chase |
+| LLY | Eli Lilly |
+| MA | Mastercard |
+| META | Meta Platforms |
+| MS | Morgan Stanley |
+| MSFT | Microsoft |
+| NFLX | Netflix |
+| NVDA | NVIDIA |
+| ORCL | Oracle |
+| QQQ | Invesco QQQ ETF |
+| SPY | SPDR S&P 500 ETF |
+| TSLA | Tesla |
+| UNH | UnitedHealth Group |
+| V | Visa |
+| WMT | Walmart |
+| XOM | Exxon Mobil |
 
 ---
 
@@ -366,7 +398,6 @@ The FastAPI backend provides services for:
 When the backend is running, FastAPI provides interactive API documentation through:
 
 http://127.0.0.1:8000/docs
-
 
 ---
 
