@@ -57,10 +57,7 @@ The platform:
 
 The current watchlist includes:
 
-* AAPL — Apple
-* MSFT — Microsoft
-* NVDA — NVIDIA
-* SPY — SPDR S&P 500 ETF
+The current market universe includes 30 stocks and ETFs.
 
 ---
 
@@ -88,12 +85,20 @@ The Next.js dashboard provides an interactive interface for exploring historical
 
 The dashboard communicates with the FastAPI backend through REST endpoints to retrieve market data, analytics, and machine-learning predictions.
 
-### Supported Symbols
+### Supported Market Universe
 
-* AAPL — Apple
-* MSFT — Microsoft
-* NVDA — NVIDIA
-* SPY — SPDR S&P 500 ETF
+The dashboard supports the full 30-symbol market universe used by the
+data-ingestion and machine-learning pipelines.
+
+The interface allows users to select individual symbols and inspect:
+
+* Historical OHLC price data
+* Candlestick charts
+* Moving averages
+* Market signals
+* Machine-learning predictions
+* Prediction probability
+* Model confidence
 
 ---
 
