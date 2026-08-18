@@ -200,15 +200,24 @@ flowchart LR
     H --> J[Market Signals]
 
     H --> K[ML Predictions]
-```text
-## Technology Stack
-### The key point
+```
 
-You currently have:
+ ## Technology Stack
 
-```text
-H --> K[ML Predictions]
-## Technology Stack
+| Layer | Technology |
+|---|---|
+| Programming | Python 3.12 |
+| Data Processing | Pandas, NumPy |
+| Machine Learning | scikit-learn, XGBoost |
+| Data Source | Yahoo Finance |
+| Database | PostgreSQL |
+| Backend | FastAPI |
+| Scheduling | APScheduler |
+| Frontend | Next.js, React, TypeScript |
+| Financial Charts | Lightweight Charts |
+| API Communication | REST |
+| Environment | Python virtual environment |
+| Version Control | Git / GitHub |
 
 ---
 
