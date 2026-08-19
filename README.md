@@ -55,9 +55,8 @@ The platform:
 9. Serves predictions through a FastAPI API.
 10. Visualizes market data and model outputs through a Next.js dashboard.
 
-The current market universe includes 30 stocks and ETFs:
+The data-ingestion pipeline supports a 30-symbol universe of stocks and ETFs:
 
-The current market universe includes 30 stocks and ETFs.
 | Symbol | Company / Instrument |
 |---|---|
 | AAPL | Apple |
@@ -91,48 +90,42 @@ The current market universe includes 30 stocks and ETFs.
 | WMT | Walmart |
 | XOM | Exxon Mobil |
 
+The platform supports analysis across the 30-symbol market-data universe, with AAPL, MSFT, NVDA, and SPY currently serving as the primary symbols for the machine-learning workflow and dashboard watchlist.
+
 ---
 
 ## Dashboard
 
-The Next.js dashboard provides an interactive interface for exploring historical market behavior, technical indicators, and machine-learning signals.
+The Next.js dashboard provides an interactive interface for exploring historical market data, technical indicators, and machine-learning signals.
 
 ### Market Visualization
 
-* Interactive candlestick charts
-* Historical OHLC price analysis
-* Moving-average overlays
-* Multi-symbol analysis
-* Visual representation of market trends
+- Interactive candlestick charts
+- Historical OHLC price analysis
+- Moving-average overlays
+- Market trend visualization
+- Symbol selection for supported market instruments
 
 ### Machine-Learning Insights
 
-* BUY / HOLD / SELL market signals
-* Machine-learning prediction output
-* Prediction probability
-* Model confidence
-* Current market price
+- BUY / HOLD / SELL signals
+- Model predictions
+- Prediction probabilities
+- Model confidence scores
+- Current market price
 
-### Real-Time Updates
+### Supported Market Analysis
 
-The dashboard communicates with the FastAPI backend through REST endpoints to retrieve market data, analytics, and machine-learning predictions.
+The platform supports market-data and technical analysis across the broader 30-symbol market-data universe.
 
-### Supported Market Universe
+The current dashboard watchlist and primary machine-learning workflow use AAPL, MSFT, NVDA, and SPY, while the underlying platform supports analysis across the broader 30-symbol universe.
 
-The dashboard supports the full 30-symbol market universe used by the
-data-ingestion and machine-learning pipelines.
+### Data and Application Updates
 
-The interface allows users to select individual symbols and inspect:
+The dashboard communicates with the FastAPI backend using two mechanisms:
 
-* Historical OHLC price data
-* Candlestick charts
-* Moving averages
-* Market signals
-* Machine-learning predictions
-* Prediction probability
-* Model confidence
-
----
+- **REST API** for historical market data, OHLC analytics, and machine-learning predictions.
+- **WebSocket** for streaming market-data updates.
 
 ## Key Features
 
