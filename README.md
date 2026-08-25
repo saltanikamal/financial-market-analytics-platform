@@ -96,36 +96,87 @@ The platform supports analysis across the 30-symbol market-data universe, with A
 
 ## Dashboard
 
-The Next.js dashboard provides an interactive interface for exploring historical market data, technical indicators, and machine-learning signals.
+The Next.js dashboard provides an interactive interface for exploring historical market data, technical indicators, and machine-learning predictions.
 
 ### Market Visualization
 
-- Interactive candlestick charts
-- Historical OHLC price analysis
-- Moving-average overlays
-- Market trend visualization
-- Symbol selection for supported market instruments
+- Interactive candlestick price charts
+- Historical OHLC market data
+- Current market price
+- Technical market signal based on MA7 versus MA20
+- Symbol selection across the supported watchlist
+- Responsive chart layout
 
 ### Machine-Learning Insights
 
-- BUY / HOLD / SELL signals
-- Model predictions
-- Prediction probabilities
-- Model confidence scores
+The dashboard displays the output of the registered machine-learning model for the selected symbol:
+
+- BUY / HOLD / SELL prediction
+- Prediction probability
+- Prediction confidence score
+- Confidence level
+- Probability margin
+- Model type
+- Model version
+- Prediction class
 - Current market price
+
+### Signal Comparison
+
+The dashboard compares two independent analytical signals:
+
+- **Technical Analysis** — based on the relationship between MA7 and MA20.
+- **Machine Learning** — based on the registered classification model.
+
+The dashboard identifies whether the two signals currently **agree** or **diverge**.
+
+This provides a simple way to compare a traditional technical-indicator signal with the machine-learning model output.
+
+### Probability Breakdown
+
+For the multiclass prediction, the dashboard displays the model's probability distribution across:
+
+| Class | Interpretation |
+|---|---|
+| Bearish | SELL |
+| Neutral | HOLD |
+| Bullish | BUY |
+
+The probability bars provide a visual representation of the model's relative confidence across the three classes.
+
+### Model Performance
+
+When evaluation metrics are available for the registered model, the dashboard displays:
+
+- Accuracy
+- Precision
+- Recall
+- F1 Score
+- ROC-AUC
+
+These metrics describe model evaluation performance and should not be interpreted as the probability that a particular investment will be successful.
 
 ### Supported Market Analysis
 
-The platform supports market-data and technical analysis across the broader 30-symbol market-data universe.
+The underlying platform supports market-data and technical analysis across the 30-symbol market-data universe.
 
-The current dashboard watchlist and primary machine-learning workflow use AAPL, MSFT, NVDA, and SPY, while the underlying platform supports analysis across the broader 30-symbol universe.
+The current dashboard watchlist and primary machine-learning workflow use:
+
+- AAPL
+- MSFT
+- NVDA
+- SPY
+
+The broader platform supports the complete 30-symbol universe documented above.
 
 ### Data and Application Updates
 
-The dashboard communicates with the FastAPI backend using two mechanisms:
+The dashboard communicates with the FastAPI backend using:
 
 - **REST API** for historical market data, OHLC analytics, and machine-learning predictions.
-- **WebSocket** for streaming market-data updates.
+- **WebSocket** infrastructure for market-data streaming.
+
+---
 
 ## Key Features
 
