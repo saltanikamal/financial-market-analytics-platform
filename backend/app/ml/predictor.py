@@ -1,5 +1,5 @@
+import math
 import pandas as pd
-
 
 from app.ml.registry.model_registry import ModelRegistry
 from app.ml.utils import load_model
@@ -7,493 +7,538 @@ from app.ml.data_loader import load_stock_data
 from app.ml.feature_engineering import add_features
 
 
-
 # =====================================
 # SIGNAL MAPPING
 # =====================================
 
 def get_signal(predicted_class):
-
     """
     Convert classification output into trading signal.
 
     Classes:
-        0 = Bearish
-        1 = Neutral
-        2 = Bullish
+        0 = Bearish / SELL
+        1 = Neutral / HOLD
+        2 = Bullish / BUY
     """
 
     if predicted_class == 2:
-
         return "BUY"
 
-
     elif predicted_class == 0:
-
         return "SELL"
 
-
     else:
-
         return "HOLD"
 
 
+# =====================================
+# CONFIDENCE
+# =====================================
 
 def get_confidence(probability, margin):
-
     """
     Calculate prediction confidence.
 
-    Parameters
-    ----------
     probability:
-        Highest predicted class probability.
+        Highest class probability.
 
     margin:
-        Difference between highest and second highest
-        class probabilities.
-
-    Returns
-    -------
-    confidence_score:
-        Numeric confidence percentage.
-
-    confidence_level:
-        HIGH / MEDIUM / LOW
+        Difference between highest and
+        second-highest probability.
     """
 
     score = (
-
-        (probability * 0.7)
-
+        probability * 0.7
         +
-
-        (margin * 0.3)
-
+        margin * 0.3
     )
-
 
     confidence_score = round(
-
         score * 100,
-
         2
-
     )
 
-
-    if confidence_score >= 70:
-
+    if confidence_score >= 75:
         confidence_level = "HIGH"
 
-
     elif confidence_score >= 50:
-
         confidence_level = "MEDIUM"
 
-
     else:
-
         confidence_level = "LOW"
 
-
-
-    return confidence_score, confidence_level
-
-
-
-
-# =====================================
-# FEATURE PREPARATION
-# =====================================
-
-def prepare_features(df, features):
-
-    """
-    Prepare latest feature row for prediction.
-    """
-
-    df = df.copy()
-
-
-
-    # Normalize database columns
-
-    if "close_price" in df.columns:
-
-        df["close"] = df["close_price"]
-
-
-
-    if "volume" in df.columns:
-
-        df["volume"] = pd.to_numeric(
-
-            df["volume"],
-
-            errors="coerce"
-
-        )
-
-
-
-    if "close" in df.columns:
-
-        df["close"] = pd.to_numeric(
-
-            df["close"],
-
-            errors="coerce"
-
-        )
-
-
-
-    # Technical indicators
-
-    df = add_features(
-        df
+    return (
+        confidence_score,
+        confidence_level
     )
 
 
+# =====================================
+# SAFE FLOAT
+# =====================================
 
-    df = df.dropna()
+def safe_float(
+    value,
+    default=0.0
+):
+    """
+    Convert a value to a JSON-safe float.
 
+    NaN and Infinity are not valid JSON values.
+    """
 
+    try:
 
-    if df.empty:
+        value = float(value)
 
-        raise ValueError(
+        if not math.isfinite(value):
+            return default
 
-            "No data available after feature engineering"
+        return value
 
-        )
+    except (
+        TypeError,
+        ValueError
+    ):
 
-
-
-    latest = df.iloc[-1]
-
-
-
-    X = pd.DataFrame(
-
-        [latest[features]]
-
-    )
-
-
-    return X, latest
-
-
+        return default
 
 
 # =====================================
-# MAIN PREDICT FUNCTION
+# CLEAN METRICS
+# =====================================
+
+def clean_metrics(metrics):
+    """
+    Convert model metrics into JSON-safe values.
+
+    NaN and Infinity become None.
+    """
+
+    if not metrics:
+        return {}
+
+    cleaned = {}
+
+    for key, value in metrics.items():
+
+        if value is None:
+
+            cleaned[key] = None
+
+            continue
+
+        try:
+
+            numeric_value = float(value)
+
+            if math.isfinite(
+                numeric_value
+            ):
+
+                cleaned[key] = numeric_value
+
+            else:
+
+                cleaned[key] = None
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            cleaned[key] = value
+
+    return cleaned
+
+
+# =====================================
+# CLASS PROBABILITY MAPPING
+# =====================================
+
+def map_class_probabilities(
+    model,
+    probabilities
+):
+    """
+    Map predicted probabilities according
+    to the model's actual class labels.
+
+    Example:
+
+        model.classes_ = [0, 1, 2]
+
+    produces:
+
+        bearish = P(0)
+        neutral = P(1)
+        bullish = P(2)
+
+    For a two-class model:
+
+        model.classes_ = [1, 2]
+
+    produces:
+
+        bearish = 0
+        neutral = P(1)
+        bullish = P(2)
+
+    This prevents index errors such as:
+
+        index 2 is out of bounds
+    """
+
+    class_probabilities = {
+        0: 0.0,
+        1: 0.0,
+        2: 0.0
+    }
+
+    for class_id, probability in zip(
+        model.classes_,
+        probabilities
+    ):
+
+        class_id = int(
+            class_id
+        )
+
+        if class_id in class_probabilities:
+
+            class_probabilities[
+                class_id
+            ] = safe_float(
+                probability
+            )
+
+    return class_probabilities
+
+
+# =====================================
+# MAIN PREDICTION
 # =====================================
 
 def predict(symbol):
-
     """
-    Generate multiclass stock prediction.
-
-    Classes:
-
-        0 -> Bearish
-        1 -> Neutral
-        2 -> Bullish
+    Generate an ML prediction for a stock.
 
     Returns:
-        prediction
-        probabilities
+
+        symbol
+        model_used
+        model_version
+        prediction_class
+        signal
+        probability
         confidence
-        trading signal
+        confidence_level
+        probability_margin
+        probabilities
+        current_price
+        metrics
     """
 
     symbol = symbol.upper()
 
-
-
     print(
-        f"\nPredicting {symbol}"
+        f"Predicting {symbol}"
     )
 
-
-
-    # ---------------------------------
-    # Load best model
-    # ---------------------------------
+    # =================================
+    # MODEL REGISTRY
+    # =================================
 
     registry = ModelRegistry()
 
-
-
     model_info = registry.get_best_model(
-
         symbol
-
     )
 
+    model_name = model_info[
+        "model"
+    ]
 
+    version = model_info[
+        "version"
+    ]
 
-    model_path = model_info["path"]
+    model_path = model_info[
+        "path"
+    ]
 
-    model_name = model_info["model"]
+    metrics = model_info.get(
+        "metrics",
+        {}
+    )
 
-    version = model_info["version"]
-
-    features = model_info["features"]
-
-
+    features = model_info.get(
+        "features",
+        []
+    )
 
     print(
         f"Using model: {model_name}"
     )
 
-
     print(
         f"Model version: {version}"
     )
 
-
-
-    # ---------------------------------
-    # Load model
-    # ---------------------------------
+    # =================================
+    # LOAD MODEL
+    # =================================
 
     model = load_model(
-
         model_path
-
     )
 
-
-
-    # ---------------------------------
-    # Load latest data
-    # ---------------------------------
+    # =================================
+    # LOAD STOCK DATA
+    # =================================
 
     df = load_stock_data(
-
         symbol
-
     )
 
+    if df is None or df.empty:
 
+        raise ValueError(
+            f"No stock data available for {symbol}"
+        )
 
-    X, latest = prepare_features(
-
-        df,
-
-        features
-
+    print(
+        f"Raw rows: {len(df)}"
     )
 
+    # =================================
+    # FEATURE ENGINEERING
+    # =================================
 
+    df = add_features(
+        df
+    )
 
-    # ---------------------------------
-    # Probability prediction
-    # ---------------------------------
+    if df is None or df.empty:
+
+        raise ValueError(
+            f"Feature engineering produced no data for {symbol}"
+        )
+
+    print(
+        f"Rows after features: {len(df)}"
+    )
+
+    # =================================
+    # LATEST ROW
+    # =================================
+
+    latest = df.iloc[-1]
+
+    # =================================
+    # VALIDATE FEATURES
+    # =================================
+
+    missing_features = [
+        feature
+        for feature in features
+        if feature not in df.columns
+    ]
+
+    if missing_features:
+
+        raise ValueError(
+            f"Missing features for {symbol}: "
+            f"{missing_features}"
+        )
+
+    # =================================
+    # PREDICTION INPUT
+    # =================================
+
+    X = (
+        df[features]
+        .iloc[[-1]]
+        .copy()
+    )
+
+    # =================================
+    # PREDICT PROBABILITIES
+    # =================================
 
     probabilities = model.predict_proba(
-
         X
-
     )[0]
 
+    probabilities = [
+        safe_float(
+            probability
+        )
+        for probability in probabilities
+    ]
 
+    # =================================
+    # MODEL CLASSES
+    # =================================
 
-    predicted_index = probabilities.argmax()
+    classes = [
+        int(class_id)
+        for class_id in model.classes_
+    ]
 
+    # =================================
+    # PREDICTED CLASS
+    # =================================
 
-
-    predicted_class = int(
-
-        model.classes_[
-
-            predicted_index
-
-        ]
-
+    predicted_index = max(
+        range(
+            len(probabilities)
+        ),
+        key=lambda i:
+            probabilities[i]
     )
 
+    predicted_class = classes[
+        predicted_index
+    ]
 
+    # =================================
+    # SORT PROBABILITIES
+    # =================================
 
     sorted_probabilities = sorted(
-
         probabilities,
-
         reverse=True
-
     )
 
-
-
-    max_probability = float(
-
+    max_probability = (
         sorted_probabilities[0]
-
     )
 
+    if len(
+        sorted_probabilities
+    ) > 1:
 
+        second_probability = (
+            sorted_probabilities[1]
+        )
 
-    second_probability = float(
+    else:
 
-        sorted_probabilities[1]
-
-    )
-
-
+        second_probability = 0.0
 
     margin = (
-
         max_probability
-
         -
-
         second_probability
-
     )
 
-
+    # =================================
+    # SIGNAL
+    # =================================
 
     signal = get_signal(
-
         predicted_class
-
     )
 
+    # =================================
+    # CONFIDENCE
+    # =================================
 
-
-    confidence_score, confidence_level = get_confidence(
-
-        max_probability,
-
-        margin
-
+    confidence_score, confidence_level = (
+        get_confidence(
+            max_probability,
+            margin
+        )
     )
 
+    # =================================
+    # CURRENT PRICE
+    # =================================
 
-
-    current_price = float(
-
+    current_price = safe_float(
         latest["close"]
-
     )
 
+    # =================================
+    # CLASS PROBABILITIES
+    # =================================
 
+    class_probabilities = (
+        map_class_probabilities(
+            model,
+            probabilities
+        )
+    )
 
-    # ---------------------------------
-    # Response
-    # ---------------------------------
+    # =================================
+    # CLEAN METRICS
+    # =================================
+
+    cleaned_metrics = clean_metrics(
+        metrics
+    )
+
+    # =================================
+    # RESULT
+    # =================================
 
     result = {
 
-
         "symbol": symbol,
-
 
         "model_used": model_name,
 
-
         "model_version": version,
-
 
         "prediction_class": predicted_class,
 
-
         "signal": signal,
 
-
         "probability": round(
-
             max_probability,
-
             4
-
         ),
-
 
         "confidence": confidence_score,
 
-
         "confidence_level": confidence_level,
 
-
         "probability_margin": round(
-
             margin,
-
             4
-
         ),
-
 
         "probabilities": {
 
-
             "bearish": round(
-
-                float(probabilities[0]),
-
+                class_probabilities.get(
+                    0,
+                    0.0
+                ),
                 4
-
             ),
-
 
             "neutral": round(
-
-                float(probabilities[1]),
-
+                class_probabilities.get(
+                    1,
+                    0.0
+                ),
                 4
-
             ),
 
-
             "bullish": round(
-
-                float(probabilities[2]),
-
+                class_probabilities.get(
+                    2,
+                    0.0
+                ),
                 4
-
             )
-
         },
-
 
         "current_price": current_price,
 
-
-        "metrics": model_info.get(
-
-            "metrics",
-
-            {}
-
-        )
-
+        "metrics": cleaned_metrics
     }
 
-
-
     return result
-
-
-
-
-# =====================================
-# TEST
-# =====================================
-
-if __name__ == "__main__":
-
-
-    result = predict(
-
-        "AAPL"
-
-    )
-
-
-    print("\nPrediction Result:")
-
-    print(result)

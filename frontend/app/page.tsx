@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/dashboard/Header";
 import CandleChart from "@/components/charts/CandleChart";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://127.0.0.1:8000";
 
 const STOCKS = [
   "AAPL",
@@ -49,6 +49,62 @@ type Candle = {
   close: number;
 };
 
+type Prediction = {
+  symbol: string;
+  model_used: string;
+  model_version: string;
+  prediction_class: number;
+  signal: Signal;
+  probability: number;
+  confidence: number;
+  confidence_level: string;
+  probability_margin: number;
+  probabilities: {
+    bearish: number;
+    neutral: number;
+    bullish: number;
+  };
+  current_price: number;
+  metrics?: {
+    accuracy?: number;
+    precision?: number;
+    recall?: number;
+    f1?: number;
+    roc_auc?: number | null;
+  };
+};
+
+function signalClasses(signal: Signal) {
+  if (signal === "BUY") {
+    return {
+      background: "bg-emerald-500/15",
+      border: "border-emerald-500/30",
+      text: "text-emerald-400",
+      badge: "bg-emerald-500/20",
+    };
+  }
+
+  if (signal === "SELL") {
+    return {
+      background: "bg-red-500/15",
+      border: "border-red-500/30",
+      text: "text-red-400",
+      badge: "bg-red-500/20",
+    };
+  }
+
+  return {
+    background: "bg-amber-500/15",
+    border: "border-amber-500/30",
+    text: "text-amber-400",
+    badge: "bg-amber-500/20",
+  };
+}
+
+function probabilityWidth(value: number) {
+  return `${Math.max(0, Math.min(100, value * 100))}%`;
+}
+
 export default function Dashboard() {
   const [symbol, setSymbol] = useState("AAPL");
 
@@ -59,7 +115,7 @@ export default function Dashboard() {
     useState<number | null>(null);
 
   const [prediction, setPrediction] =
-    useState<any>(null);
+    useState<Prediction | null>(null);
 
   const [dataMessage, setDataMessage] =
     useState("");
@@ -67,12 +123,20 @@ export default function Dashboard() {
   const [chartData, setChartData] =
     useState<Candle[]>([]);
 
+  const [loadingPrediction, setLoadingPrediction] =
+    useState(false);
+
+  const [loadingChart, setLoadingChart] =
+    useState(false);
+
   // ==========================================
-  // LOAD PRICE DATA
+  // LOAD MARKET DATA
   // ==========================================
 
   useEffect(() => {
     async function loadChart() {
+      setLoadingChart(true);
+
       try {
         const response = await fetch(
           `${API_BASE}/analytics/ohlc/${symbol}`
@@ -82,7 +146,10 @@ export default function Dashboard() {
           setDataMessage(
             `Unable to load market data for ${symbol}.`
           );
+
           setChartData([]);
+          setLatestPrice(null);
+
           return;
         }
 
@@ -105,15 +172,21 @@ export default function Dashboard() {
 
         const data = result.data || [];
 
-        const candles: Candle[] = data.map(
-          (d: any) => ({
+        const candles: Candle[] = data
+          .map((d: any) => ({
             date: String(d.date).split("T")[0],
             open: Number(d.open),
             high: Number(d.high),
             low: Number(d.low),
             close: Number(d.close),
-          })
-        );
+          }))
+          .filter(
+            (d: Candle) =>
+              Number.isFinite(d.open) &&
+              Number.isFinite(d.high) &&
+              Number.isFinite(d.low) &&
+              Number.isFinite(d.close)
+          );
 
         setChartData(candles);
 
@@ -126,8 +199,8 @@ export default function Dashboard() {
           const lastMA20 = Number(last.ma20);
 
           if (
-            !Number.isNaN(lastMA7) &&
-            !Number.isNaN(lastMA20)
+            Number.isFinite(lastMA7) &&
+            Number.isFinite(lastMA20)
           ) {
             if (lastMA7 > lastMA20) {
               setSignal("BUY");
@@ -142,7 +215,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error(
-          `Error loading chart data for ${symbol}:`,
+          `Error loading market data for ${symbol}:`,
           error
         );
 
@@ -153,6 +226,8 @@ export default function Dashboard() {
         setChartData([]);
         setLatestPrice(null);
         setSignal("HOLD");
+      } finally {
+        setLoadingChart(false);
       }
     }
 
@@ -166,6 +241,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadPrediction() {
       setPrediction(null);
+      setLoadingPrediction(true);
 
       try {
         const response = await fetch(
@@ -178,10 +254,12 @@ export default function Dashboard() {
           );
 
           setPrediction(null);
+
           return;
         }
 
-        const result = await response.json();
+        const result: Prediction =
+          await response.json();
 
         setPrediction(result);
       } catch (error) {
@@ -191,176 +269,598 @@ export default function Dashboard() {
         );
 
         setPrediction(null);
+      } finally {
+        setLoadingPrediction(false);
       }
     }
 
     loadPrediction();
   }, [symbol]);
 
-  // ==========================================
-  // DASHBOARD
-  // ==========================================
+  const predictionStyles = prediction
+    ? signalClasses(prediction.signal)
+    : signalClasses("HOLD");
 
   return (
-    <div
-      className="
-        min-h-screen
-        bg-slate-950
-        text-white
-        p-6
-      "
-    >
-      <Header />
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-6 py-8">
 
-      <h1
-        className="
-          text-3xl
-          font-bold
-          mb-6
-        "
-      >
-        Financial Intelligence Dashboard
-      </h1>
+        {/* ========================================
+            HEADER
+        ======================================== */}
 
-      {/* STOCK SELECTOR */}
+        <Header />
 
-      <select
-        className="
-          bg-slate-800
-          rounded
-          p-2
-          mb-5
-        "
-        value={symbol}
-        onChange={(e) =>
-          setSymbol(e.target.value)
-        }
-      >
-        {STOCKS.map((stock) => (
-          <option
-            key={stock}
-            value={stock}
-          >
-            {stock}
-          </option>
-        ))}
-      </select>
+        {/* ========================================
+            CONTROL BAR
+        ======================================== */}
 
-      {/* MARKET SIGNAL */}
+        <div className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/70 p-5 md:flex-row md:items-center md:justify-between">
 
-      <div
-        className={`
-          rounded-lg
-          p-4
-          mb-5
-          w-fit
-
-          ${
-            signal === "BUY"
-              ? "bg-green-600"
-              : signal === "SELL"
-              ? "bg-red-600"
-              : "bg-yellow-500"
-          }
-        `}
-      >
-        <h2 className="font-bold text-lg">
-          Market Signal
-        </h2>
-
-        <p>
-          Signal: {signal}
-        </p>
-
-        {latestPrice !== null && (
-          <p>
-            Price: $
-            {latestPrice.toFixed(2)}
-          </p>
-        )}
-      </div>
-
-      {/* ML PREDICTION */}
-
-      <div
-        className="
-          bg-slate-800
-          rounded-lg
-          p-5
-          mb-5
-          w-fit
-        "
-      >
-        <h2 className="font-bold mb-3">
-          ML Prediction
-        </h2>
-
-        {prediction ? (
           <div>
-            <p>
-              Signal:{" "}
-              {prediction.signal ?? "N/A"}
+            <p className="text-sm font-medium text-slate-400">
+              Market Watchlist
             </p>
 
-            <p>
-              Confidence:{" "}
-              {prediction.confidence ?? "N/A"}
+            <p className="mt-1 text-sm text-slate-500">
+              Select a symbol to analyze market conditions
+              and ML predictions.
+            </p>
+          </div>
+
+          <select
+            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-semibold text-white outline-none transition hover:border-slate-500 focus:border-blue-500 md:w-56"
+            value={symbol}
+            onChange={(e) =>
+              setSymbol(e.target.value)
+            }
+          >
+            {STOCKS.map((stock) => (
+              <option
+                key={stock}
+                value={stock}
+              >
+                {stock}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* ========================================
+            TOP SUMMARY
+        ======================================== */}
+
+        <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+
+          {/* PRICE */}
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Current Price
             </p>
 
-            <p>
-              Probability:{" "}
-              {prediction.probability ?? "N/A"}
+            <div className="mt-2 text-3xl font-bold">
+              {latestPrice !== null
+                ? `$${latestPrice.toFixed(2)}`
+                : "—"}
+            </div>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Latest available market price
+            </p>
+          </div>
+
+          {/* MARKET SIGNAL */}
+
+          <div
+            className={`rounded-xl border p-5 ${signalClasses(signal).background} ${signalClasses(signal).border}`}
+          >
+            <p className="text-sm text-slate-400">
+              Technical Market Signal
             </p>
 
-            {prediction.model && (
-              <p>
-                Model: {prediction.model}
+            <div
+              className={`mt-2 text-3xl font-bold ${signalClasses(signal).text}`}
+            >
+              {signal}
+            </div>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Based on MA7 vs MA20
+            </p>
+          </div>
+
+          {/* ML SIGNAL */}
+
+          <div
+            className={`rounded-xl border p-5 ${predictionStyles.background} ${predictionStyles.border}`}
+          >
+            <p className="text-sm text-slate-400">
+              ML Prediction
+            </p>
+
+            {loadingPrediction ? (
+              <div className="mt-2 text-2xl font-bold text-slate-400">
+                Loading...
+              </div>
+            ) : prediction ? (
+              <>
+                <div
+                  className={`mt-2 text-3xl font-bold ${predictionStyles.text}`}
+                >
+                  {prediction.signal}
+                </div>
+
+                <p className="mt-2 text-xs text-slate-500">
+                  Confidence{" "}
+                  {prediction.confidence.toFixed(2)}%
+                </p>
+              </>
+            ) : (
+              <div className="mt-2 text-2xl font-bold text-slate-500">
+                N/A
+              </div>
+            )}
+          </div>
+        </div>
+        {/* ========================================
+            SIGNAL COMPARISON
+        ======================================== */}
+
+        <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
+
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold">
+              Signal Comparison
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Compare the technical market signal with the machine learning prediction.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+            {/* TECHNICAL SIGNAL */}
+
+            <div className="rounded-lg bg-slate-800 p-5">
+
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Technical Analysis
+              </p>
+
+              <div
+                className={`mt-2 text-2xl font-bold ${
+                  signalClasses(signal).text
+                }`}
+              >
+                {signal}
+              </div>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Based on MA7 vs MA20
+              </p>
+
+            </div>
+
+            {/* ML SIGNAL */}
+
+            <div className="rounded-lg bg-slate-800 p-5">
+
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Machine Learning
+              </p>
+
+              {prediction ? (
+                <>
+                  <div
+                    className={`mt-2 text-2xl font-bold ${
+                      predictionStyles.text
+                    }`}
+                  >
+                    {prediction.signal}
+                  </div>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Confidence{" "}
+                    {prediction.confidence.toFixed(2)}%
+                  </p>
+                </>
+              ) : (
+                <div className="mt-2 text-2xl font-bold text-slate-500">
+                  N/A
+                </div>
+              )}
+
+            </div>
+
+          </div>
+
+          {/* AGREEMENT STATUS */}
+
+          {prediction && (
+            <div className="mt-5 rounded-lg border border-slate-700 bg-slate-950 p-4">
+
+              {signal === prediction.signal ? (
+                <div>
+                  <p className="font-semibold text-emerald-400">
+                    Signals Agree
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Technical analysis and the ML model currently indicate the same market direction.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-semibold text-amber-400">
+                    Signals Diverge
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Technical analysis and the ML model currently indicate different market directions.
+                  </p>
+                </div>
+              )}
+
+            </div>
+          )}
+
+        </div>
+        {/* ========================================
+            ML DETAILS
+        ======================================== */}
+
+        <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+
+          {/* MODEL SUMMARY */}
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">
+                  Machine Learning Prediction
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Classification model output
+                </p>
+              </div>
+
+              {prediction && (
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${predictionStyles.badge} ${predictionStyles.text}`}
+                >
+                  {prediction.confidence_level}
+                </span>
+              )}
+            </div>
+
+            {loadingPrediction ? (
+              <p className="text-slate-400">
+                Loading prediction...
+              </p>
+            ) : prediction ? (
+              <div className="grid grid-cols-2 gap-4">
+
+                <div className="rounded-lg bg-slate-800 p-4">
+                  <p className="text-xs text-slate-500">
+                    Signal
+                  </p>
+
+                  <p
+                    className={`mt-1 text-xl font-bold ${predictionStyles.text}`}
+                  >
+                    {prediction.signal}
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-800 p-4">
+                  <p className="text-xs text-slate-500">
+                    Confidence
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    {prediction.confidence.toFixed(2)}%
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-800 p-4">
+                  <p className="text-xs text-slate-500">
+                    Probability
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    {prediction.probability.toFixed(4)}
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-slate-800 p-4">
+                  <p className="text-xs text-slate-500">
+                    Probability Margin
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    {prediction.probability_margin.toFixed(4)}
+                  </p>
+                </div>
+
+              </div>
+            ) : (
+              <p className="text-slate-500">
+                No ML prediction available.
               </p>
             )}
 
-            {prediction.model_version && (
-              <p>
-                Model Version:{" "}
-                {prediction.model_version}
+            {prediction && (
+              <div className="mt-5 border-t border-slate-800 pt-4">
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">
+                    Model
+                  </span>
+
+                  <span className="font-medium uppercase">
+                    {prediction.model_used}
+                  </span>
+                </div>
+
+                <div className="mt-2 flex justify-between text-sm">
+                  <span className="text-slate-500">
+                    Model Version
+                  </span>
+
+                  <span className="font-mono text-xs text-slate-300">
+                    {prediction.model_version}
+                  </span>
+                </div>
+
+                <div className="mt-2 flex justify-between text-sm">
+                  <span className="text-slate-500">
+                    Prediction Class
+                  </span>
+
+                  <span>
+                    {prediction.prediction_class}
+                  </span>
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* PROBABILITY BREAKDOWN */}
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+
+            <h2 className="text-lg font-semibold">
+              Probability Breakdown
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Model probability distribution across signals
+            </p>
+
+            {prediction ? (
+              <div className="mt-6 space-y-5">
+
+                {/* BEARISH */}
+
+                <div>
+                  <div className="mb-2 flex justify-between text-sm">
+                    <span className="text-slate-400">
+                      Bearish
+                    </span>
+
+                    <span className="font-semibold text-red-400">
+                      {(prediction.probabilities.bearish * 100).toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                    <div
+                      className="h-full rounded-full bg-red-500"
+                      style={{
+                        width: probabilityWidth(
+                          prediction.probabilities.bearish
+                        ),
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* NEUTRAL */}
+
+                <div>
+                  <div className="mb-2 flex justify-between text-sm">
+                    <span className="text-slate-400">
+                      Neutral
+                    </span>
+
+                    <span className="font-semibold text-amber-400">
+                      {(prediction.probabilities.neutral * 100).toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                    <div
+                      className="h-full rounded-full bg-amber-500"
+                      style={{
+                        width: probabilityWidth(
+                          prediction.probabilities.neutral
+                        ),
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* BULLISH */}
+
+                <div>
+                  <div className="mb-2 flex justify-between text-sm">
+                    <span className="text-slate-400">
+                      Bullish
+                    </span>
+
+                    <span className="font-semibold text-emerald-400">
+                      {(prediction.probabilities.bullish * 100).toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                    <div
+                      className="h-full rounded-full bg-emerald-500"
+                      style={{
+                        width: probabilityWidth(
+                          prediction.probabilities.bullish
+                        ),
+                      }}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <p className="mt-6 text-slate-500">
+                Probability data unavailable.
               </p>
             )}
           </div>
-        ) : (
-          <p>
-            No ML prediction available for{" "}
-            {symbol}
-          </p>
-        )}
-      </div>
-
-      {/* DATA MESSAGE */}
-
-      {dataMessage && (
-        <div
-          className="
-            bg-red-700
-            rounded
-            p-3
-            mb-5
-          "
-        >
-          {dataMessage}
         </div>
-      )}
 
-      {/* CANDLESTICK CHART */}
+        {/* ========================================
+            MODEL METRICS
+        ======================================== */}
 
-      <div
-        className="
-          w-full
-          rounded-lg
-          bg-slate-900
-        "
-      >
-        <CandleChart
-          data={chartData}
-        />
+        {prediction?.metrics && (
+          <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
+
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">
+                Model Performance
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Registered evaluation metrics for the selected model
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+
+              <Metric
+                label="Accuracy"
+                value={prediction.metrics.accuracy}
+              />
+
+              <Metric
+                label="Precision"
+                value={prediction.metrics.precision}
+              />
+
+              <Metric
+                label="Recall"
+                value={prediction.metrics.recall}
+              />
+
+              <Metric
+                label="F1"
+                value={prediction.metrics.f1}
+              />
+
+              <Metric
+                label="ROC AUC"
+                value={prediction.metrics.roc_auc}
+              />
+
+            </div>
+          </div>
+        )}
+
+        {/* ========================================
+            MARKET DATA
+        ======================================== */}
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+
+          <div className="mb-5 flex items-center justify-between">
+
+            <div>
+              <h2 className="text-lg font-semibold">
+                {symbol} Price Chart
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Historical OHLC market data
+              </p>
+            </div>
+
+            {loadingChart && (
+              <span className="text-xs text-slate-500">
+                Loading...
+              </span>
+            )}
+
+          </div>
+
+          {dataMessage && (
+            <div className="mb-5 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+              {dataMessage}
+            </div>
+          )}
+
+          {chartData.length > 0 ? (
+            <CandleChart data={chartData} />
+          ) : (
+            !loadingChart && (
+              <div className="flex h-[500px] items-center justify-center text-slate-500">
+                No chart data available for {symbol}.
+              </div>
+            )
+          )}
+        </div>
+
+        {/* ========================================
+            FOOTER
+        ======================================== */}
+
+        <div className="mt-6 border-t border-slate-800 pt-5 text-center text-xs text-slate-600">
+          Financial Intelligence Platform · Market analytics,
+          technical indicators, and machine learning predictions
+        </div>
+
       </div>
+    </main>
+  );
+}
+
+// ==========================================
+// METRIC COMPONENT
+// ==========================================
+
+function Metric({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number | null;
+}) {
+  const valid =
+    value !== undefined &&
+    value !== null &&
+    Number.isFinite(value);
+
+  return (
+    <div className="rounded-lg bg-slate-800 p-4">
+      <p className="text-xs text-slate-500">
+        {label}
+      </p>
+
+      <p className="mt-1 text-lg font-semibold">
+        {valid
+          ? `${(value * 100).toFixed(2)}%`
+          : "N/A"}
+      </p>
     </div>
   );
 }
