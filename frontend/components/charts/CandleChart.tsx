@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
-
 type Candle = {
   date: string;
   open: number;
@@ -13,272 +12,179 @@ type Candle = {
   volume?: number;
 };
 
-
 export default function CandleChart({
   data,
 }: {
   data: Candle[];
 }) {
-
-
-  const containerRef =
-    useRef<HTMLDivElement>(null);
-
-
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const container = containerRef.current;
 
-
-    if (!containerRef.current)
+    if (!container) {
       return;
+    }
 
-
-    if (!Array.isArray(data) || data.length === 0)
+    if (!Array.isArray(data) || data.length === 0) {
       return;
+    }
 
+    // Clear any previous chart instance
+    container.innerHTML = "";
 
+    const chart = createChart(container, {
+      width: container.clientWidth || 900,
+      height: 500,
 
-    // Clear previous chart instance
-    containerRef.current.innerHTML = "";
+      layout: {
+        background: {
+          color: "#0f172a",
+        },
+        textColor: "#ffffff",
+      },
 
+      grid: {
+        vertLines: {
+          color: "#1f2937",
+        },
+        horzLines: {
+          color: "#1f2937",
+        },
+      },
 
+      rightPriceScale: {
+        borderColor: "#334155",
+      },
 
-    const chart =
-      createChart(
-        containerRef.current,
-        {
+      timeScale: {
+        borderColor: "#334155",
+        timeVisible: true,
+        secondsVisible: false,
+      },
 
-          width:
-            containerRef.current.clientWidth || 900,
+      crosshair: {
+        vertLine: {
+          color: "#64748b",
+        },
+        horzLine: {
+          color: "#64748b",
+        },
+      },
+    });
 
-          height: 500,
+    /*
+     * Your installed lightweight-charts version uses:
+     *
+     * chart.addCandlestickSeries()
+     *
+     * Do NOT import CandlestickSeries.
+     */
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: "#22c55e",
+      downColor: "#ef4444",
+      borderUpColor: "#22c55e",
+      borderDownColor: "#ef4444",
+      wickUpColor: "#22c55e",
+      wickDownColor: "#ef4444",
+    });
 
-
-          layout: {
-
-            background: {
-              color: "#0f172a",
-            },
-
-            textColor: "#ffffff",
-
-          },
-
-
-          grid: {
-
-            vertLines: {
-              color: "#1f2937",
-            },
-
-
-            horzLines: {
-              color: "#1f2937",
-            },
-
-          },
-
-
-          timeScale: {
-
-            timeVisible: true,
-
-            secondsVisible: false,
-
-          },
-
-        }
-      );
-
-
-
-
-    // lightweight-charts 4.2.0 API
-
-    const candleSeries =
-      chart.addCandlestickSeries();
-
-
-
-
-
-    // ----------------------------
+    // ------------------------------------------
     // DATA CLEANING
-    // ----------------------------
+    // ------------------------------------------
 
+    const seen = new Set<string>();
 
-    const seen =
-      new Set<number>();
+    const cleaned = data
+      .map((d) => {
+        // lightweight-charts accepts YYYY-MM-DD strings
+        // as valid Time values.
+        const date = String(d.date).split("T")[0];
 
+        return {
+          time: date,
+          open: Number(d.open),
+          high: Number(d.high),
+          low: Number(d.low),
+          close: Number(d.close),
+        };
+      })
 
-
-    const cleaned =
-
-      data
-
-        .map((d) => {
-
-
-          const timestamp =
-            new Date(d.date).getTime();
-
-
-
-          return {
-
-            time:
-              Math.floor(timestamp / 1000),
-
-            open:
-              Number(d.open),
-
-            high:
-              Number(d.high),
-
-            low:
-              Number(d.low),
-
-            close:
-              Number(d.close),
-
-          };
-
-        })
-
-
-
-        // remove invalid values
-
-        .filter((d) =>
-
-          Number.isFinite(d.time) &&
-
+      // Remove invalid records
+      .filter((d) => {
+        return (
+          /^\d{4}-\d{2}-\d{2}$/.test(d.time) &&
           Number.isFinite(d.open) &&
-
           Number.isFinite(d.high) &&
-
           Number.isFinite(d.low) &&
-
           Number.isFinite(d.close)
-
-        )
-
-
-
-        // remove duplicate dates
-
-        .filter((d) => {
-
-
-          if(seen.has(d.time))
-            return false;
-
-
-          seen.add(d.time);
-
-          return true;
-
-        })
-
-
-
-        // chart requires ascending order
-
-        .sort(
-          (a,b)=>
-            a.time - b.time
         );
+      })
 
+      // Remove duplicate dates
+      .filter((d) => {
+        if (seen.has(d.time)) {
+          return false;
+        }
 
+        seen.add(d.time);
 
+        return true;
+      })
 
+      // Chart requires ascending chronological order
+      .sort((a, b) => {
+        return a.time.localeCompare(b.time);
+      });
 
     console.log(
       "CLEANED CANDLES:",
       cleaned.length
     );
 
-
-
+    // Load cleaned data into the candlestick series
     candleSeries.setData(cleaned);
 
+    // Fit all available candles into the chart
+    chart.timeScale().fitContent();
 
+    // ------------------------------------------
+    // RESPONSIVE RESIZE
+    // ------------------------------------------
 
-    chart
-      .timeScale()
-      .fitContent();
+    const resizeObserver = new ResizeObserver(() => {
+      if (!container) {
+        return;
+      }
 
+      const width = container.clientWidth;
 
+      if (width > 0) {
+        chart.applyOptions({
+          width,
+        });
+      }
+    });
 
+    resizeObserver.observe(container);
 
-
-    // Responsive resize
-
-    const resizeObserver =
-      new ResizeObserver(() => {
-
-
-        if(containerRef.current){
-
-
-          chart.applyOptions({
-
-            width:
-              containerRef.current.clientWidth,
-
-          });
-
-
-        }
-
-
-      });
-
-
-
-    resizeObserver.observe(
-      containerRef.current
-    );
-
-
-
-
+    // ------------------------------------------
+    // CLEANUP
+    // ------------------------------------------
 
     return () => {
-
-
       resizeObserver.disconnect();
-
-
       chart.remove();
-
-
     };
-
-
-
   }, [data]);
 
-
-
-
-
   return (
-
     <div
-
       ref={containerRef}
-
       style={{
-
         width: "100%",
-
         height: 500,
-
       }}
-
     />
-
   );
-
 }

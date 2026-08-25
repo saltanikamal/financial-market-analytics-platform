@@ -327,186 +327,378 @@ export default function Dashboard() {
         </div>
 
         {/* ========================================
-            TOP SUMMARY
-        ======================================== */}
+    TOP SUMMARY
+======================================== */}
 
-        <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+<div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
 
-          {/* PRICE */}
+  {/* CURRENT PRICE */}
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">
-              Current Price
-            </p>
+  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm">
 
-            <div className="mt-2 text-3xl font-bold">
-              {latestPrice !== null
-                ? `$${latestPrice.toFixed(2)}`
-                : "—"}
-            </div>
+    <div className="flex items-start justify-between">
 
-            <p className="mt-2 text-xs text-slate-500">
-              Latest available market price
-            </p>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Current Price
+        </p>
+
+        <div className="mt-3 text-3xl font-bold tracking-tight text-white">
+          {latestPrice !== null
+            ? `$${latestPrice.toFixed(2)}`
+            : "—"}
+        </div>
+      </div>
+
+      <div className="rounded-lg bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-400">
+        {symbol}
+      </div>
+
+    </div>
+
+    <div className="mt-5 border-t border-slate-800 pt-4">
+
+      <p className="text-xs text-slate-500">
+        Latest available market price
+      </p>
+
+    </div>
+
+  </div>
+
+
+  {/* TECHNICAL SIGNAL */}
+
+  <div
+    className={`rounded-xl border p-6 shadow-sm ${
+      signalClasses(signal).background
+    } ${signalClasses(signal).border}`}
+  >
+
+    <div className="flex items-start justify-between">
+
+      <div>
+
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Technical Signal
+        </p>
+
+        <div
+          className={`mt-3 text-3xl font-bold ${
+            signalClasses(signal).text
+          }`}
+        >
+          {signal}
+        </div>
+
+      </div>
+
+      <div
+        className={`rounded-lg px-3 py-2 text-xs font-semibold ${
+          signalClasses(signal).badge
+        } ${signalClasses(signal).text}`}
+      >
+        MA7 / MA20
+      </div>
+
+    </div>
+
+    <div className="mt-5 border-t border-slate-800/60 pt-4">
+
+      <p className="text-xs text-slate-500">
+        Short-term moving-average comparison
+      </p>
+
+    </div>
+
+  </div>
+
+
+  {/* ML PREDICTION */}
+
+  <div
+    className={`rounded-xl border p-6 shadow-sm ${
+      predictionStyles.background
+    } ${predictionStyles.border}`}
+  >
+
+    <div className="flex items-start justify-between">
+
+      <div>
+
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          ML Prediction
+        </p>
+
+        {loadingPrediction ? (
+
+          <div className="mt-3 text-2xl font-bold text-slate-400">
+            Loading...
           </div>
 
-          {/* MARKET SIGNAL */}
+        ) : prediction ? (
 
           <div
-            className={`rounded-xl border p-5 ${signalClasses(signal).background} ${signalClasses(signal).border}`}
+            className={`mt-3 text-3xl font-bold ${
+              predictionStyles.text
+            }`}
           >
-            <p className="text-sm text-slate-400">
-              Technical Market Signal
-            </p>
+            {prediction.signal}
+          </div>
 
-            <div
-              className={`mt-2 text-3xl font-bold ${signalClasses(signal).text}`}
+        ) : (
+
+          <div className="mt-3 text-2xl font-bold text-slate-500">
+            N/A
+          </div>
+
+        )}
+
+      </div>
+
+      {prediction && (
+
+        <div
+          className={`rounded-lg px-3 py-2 text-xs font-semibold ${
+            predictionStyles.badge
+          } ${predictionStyles.text}`}
+        >
+          {prediction.confidence_level}
+        </div>
+
+      )}
+
+    </div>
+
+    <div className="mt-5 border-t border-slate-800/60 pt-4">
+
+      {prediction ? (
+
+        <div className="flex items-center justify-between">
+
+          <p className="text-xs text-slate-500">
+            Prediction confidence
+          </p>
+
+          <p
+            className={`text-sm font-semibold ${
+              predictionStyles.text
+            }`}
+          >
+            {prediction.confidence.toFixed(2)}%
+          </p>
+
+        </div>
+
+      ) : (
+
+        <p className="text-xs text-slate-500">
+          Machine-learning prediction unavailable
+        </p>
+
+      )}
+
+    </div>
+
+  </div>
+
+</div>
+
+
+{/* ========================================
+    SIGNAL COMPARISON
+======================================== */}
+
+<div className="mb-6 rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm">
+
+  <div className="mb-6">
+    <div className="flex items-center justify-between">
+
+      <div>
+        <h2 className="text-lg font-semibold text-white">
+          Signal Comparison
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Compare technical analysis with the machine learning prediction.
+        </p>
+      </div>
+
+      {prediction && (
+        <div
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            signal === prediction.signal
+              ? "bg-emerald-500/10 text-emerald-400"
+              : "bg-amber-500/10 text-amber-400"
+          }`}
+        >
+          {signal === prediction.signal
+            ? "AGREEMENT"
+            : "DIVERGENCE"}
+        </div>
+      )}
+
+    </div>
+  </div>
+
+
+  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+    {/* TECHNICAL ANALYSIS */}
+
+    <div className="rounded-lg border border-slate-800 bg-slate-800/60 p-5">
+
+      <div className="flex items-center justify-between">
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Technical Analysis
+          </p>
+
+          <p className="mt-1 text-xs text-slate-600">
+            MA7 vs MA20
+          </p>
+        </div>
+
+        <span className="rounded-md bg-slate-700 px-2 py-1 text-[10px] font-semibold uppercase text-slate-400">
+          Technical
+        </span>
+
+      </div>
+
+      <div
+        className={`mt-5 text-3xl font-bold ${
+          signalClasses(signal).text
+        }`}
+      >
+        {signal}
+      </div>
+
+      <p className="mt-2 text-sm text-slate-500">
+        Short-term trend signal based on moving-average positioning.
+      </p>
+
+    </div>
+
+
+    {/* MACHINE LEARNING */}
+
+    <div className="rounded-lg border border-slate-800 bg-slate-800/60 p-5">
+
+      <div className="flex items-center justify-between">
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Machine Learning
+          </p>
+
+          <p className="mt-1 text-xs text-slate-600">
+            Classification model
+          </p>
+        </div>
+
+        {prediction && (
+          <span className="rounded-md bg-slate-700 px-2 py-1 text-[10px] font-semibold uppercase text-slate-400">
+            {prediction.model_used}
+          </span>
+        )}
+
+      </div>
+
+      {prediction ? (
+
+        <>
+          <div
+            className={`mt-5 text-3xl font-bold ${
+              predictionStyles.text
+            }`}
+          >
+            {prediction.signal}
+          </div>
+
+          <div className="mt-2 flex items-center gap-2">
+
+            <span className="text-sm text-slate-500">
+              Confidence
+            </span>
+
+            <span
+              className={`text-sm font-semibold ${
+                predictionStyles.text
+              }`}
             >
-              {signal}
-            </div>
+              {prediction.confidence.toFixed(2)}%
+            </span>
 
-            <p className="mt-2 text-xs text-slate-500">
-              Based on MA7 vs MA20
-            </p>
           </div>
+        </>
 
-          {/* ML SIGNAL */}
+      ) : (
 
-          <div
-            className={`rounded-xl border p-5 ${predictionStyles.background} ${predictionStyles.border}`}
+        <div className="mt-5 text-2xl font-bold text-slate-500">
+          N/A
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
+
+
+  {/* AGREEMENT / DIVERGENCE */}
+
+  {prediction && (
+
+    <div
+      className={`mt-5 rounded-lg border p-5 ${
+        signal === prediction.signal
+          ? "border-emerald-500/20 bg-emerald-500/5"
+          : "border-amber-500/20 bg-amber-500/5"
+      }`}
+    >
+
+      <div className="flex items-start gap-4">
+
+        <div
+          className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+            signal === prediction.signal
+              ? "bg-emerald-500/10 text-emerald-400"
+              : "bg-amber-500/10 text-amber-400"
+          }`}
+        >
+          {signal === prediction.signal ? "✓" : "!"}
+        </div>
+
+        <div>
+
+          <p
+            className={`font-semibold ${
+              signal === prediction.signal
+                ? "text-emerald-400"
+                : "text-amber-400"
+            }`}
           >
-            <p className="text-sm text-slate-400">
-              ML Prediction
-            </p>
+            {signal === prediction.signal
+              ? "Signals Agree"
+              : "Signals Diverge"}
+          </p>
 
-            {loadingPrediction ? (
-              <div className="mt-2 text-2xl font-bold text-slate-400">
-                Loading...
-              </div>
-            ) : prediction ? (
-              <>
-                <div
-                  className={`mt-2 text-3xl font-bold ${predictionStyles.text}`}
-                >
-                  {prediction.signal}
-                </div>
-
-                <p className="mt-2 text-xs text-slate-500">
-                  Confidence{" "}
-                  {prediction.confidence.toFixed(2)}%
-                </p>
-              </>
-            ) : (
-              <div className="mt-2 text-2xl font-bold text-slate-500">
-                N/A
-              </div>
-            )}
-          </div>
-        </div>
-        {/* ========================================
-            SIGNAL COMPARISON
-        ======================================== */}
-
-        <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
-
-          <div className="mb-5">
-            <h2 className="text-lg font-semibold">
-              Signal Comparison
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Compare the technical market signal with the machine learning prediction.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-            {/* TECHNICAL SIGNAL */}
-
-            <div className="rounded-lg bg-slate-800 p-5">
-
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Technical Analysis
-              </p>
-
-              <div
-                className={`mt-2 text-2xl font-bold ${
-                  signalClasses(signal).text
-                }`}
-              >
-                {signal}
-              </div>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Based on MA7 vs MA20
-              </p>
-
-            </div>
-
-            {/* ML SIGNAL */}
-
-            <div className="rounded-lg bg-slate-800 p-5">
-
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Machine Learning
-              </p>
-
-              {prediction ? (
-                <>
-                  <div
-                    className={`mt-2 text-2xl font-bold ${
-                      predictionStyles.text
-                    }`}
-                  >
-                    {prediction.signal}
-                  </div>
-
-                  <p className="mt-2 text-sm text-slate-500">
-                    Confidence{" "}
-                    {prediction.confidence.toFixed(2)}%
-                  </p>
-                </>
-              ) : (
-                <div className="mt-2 text-2xl font-bold text-slate-500">
-                  N/A
-                </div>
-              )}
-
-            </div>
-
-          </div>
-
-          {/* AGREEMENT STATUS */}
-
-          {prediction && (
-            <div className="mt-5 rounded-lg border border-slate-700 bg-slate-950 p-4">
-
-              {signal === prediction.signal ? (
-                <div>
-                  <p className="font-semibold text-emerald-400">
-                    Signals Agree
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Technical analysis and the ML model currently indicate the same market direction.
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <p className="font-semibold text-amber-400">
-                    Signals Diverge
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Technical analysis and the ML model currently indicate different market directions.
-                  </p>
-                </div>
-              )}
-
-            </div>
-          )}
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            {signal === prediction.signal
+              ? "Technical analysis and the machine learning model currently indicate the same market direction."
+              : "Technical analysis and the machine learning model currently indicate different market directions."}
+          </p>
 
         </div>
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
         {/* ========================================
             ML DETAILS
         ======================================== */}
