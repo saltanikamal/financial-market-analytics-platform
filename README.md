@@ -276,7 +276,7 @@ flowchart LR
 
     H --> K[ML Predictions]
 ```
- ## Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |---|---|
