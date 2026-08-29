@@ -334,7 +334,6 @@ The scheduler automates recurring ingestion so that the platform can maintain an
 The machine-learning workflow transforms historical market observations into predictive features and classification targets.
 
 ### Feature Engineering
-```
 
 Raw OHLCV data is transformed into features such as:
 
@@ -375,7 +374,7 @@ Models are trained using historical observations and evaluated using chronologic
 
 Trained models are versioned and registered with associated metadata.
 
-This provides a structured mechanism for identifying the model used for a particular prediction and supports future model-selection improvements.
+This provides a structured mechanism for validating model artifacts, tracking model versions, and selecting the current model based on registered evaluation metrics.
 
 ---
 
@@ -424,6 +423,29 @@ The latest registered models for the primary dashboard watchlist are XGBoost cla
 | MSFT | 20260818_114825 |
 | NVDA | 20260818_114840 |
 | SPY | 20260818_114858 |
+
+### Model Selection
+
+The model registry selects the current model using a two-stage process.
+
+First, only model files that exist on disk are considered, and the newest registered version of each model type is retained. This prevents stale or missing historical models from being selected.
+
+Among the current valid models, selection is based on:
+
+1. Highest F1 score
+2. Highest accuracy as a tie-breaker
+3. Newest model version as a final tie-breaker
+
+This approach prioritizes balanced classification performance while ensuring that model selection uses valid, current artifacts.
+
+For example, the DIA registry currently contains both XGBoost and Random Forest models. Their F1 scores are extremely close:
+
+| Model | F1 | Accuracy | ROC-AUC |
+|---|---:|---:|---:|
+| Random Forest | 0.6951 | 0.7783 | 0.7466 |
+| XGBoost | 0.6942 | 0.7877 | 0.6044 |
+
+Because Random Forest has the slightly higher F1 score, it is selected by the registry despite XGBoost having slightly higher accuracy. This illustrates why the platform does not rely on accuracy alone for model selection.
 
 ### Interpretation
 
