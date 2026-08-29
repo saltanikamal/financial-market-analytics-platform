@@ -251,29 +251,22 @@ The platform is organized as an end-to-end data engineering, machine-learning, b
 ### Production Data and Application Flow
 
 ```mermaid
-
 flowchart LR
 
-    A[Yahoo Finance] --> B[ETL Pipeline]
-
-    B --> C[PostgreSQL]
+    A[Yahoo Finance] --> B[Automated ETL]
+    B --> C[(PostgreSQL)]
 
     C --> D[Feature Engineering]
-
     D --> E[ML Training]
-
     E --> F[Model Registry]
 
     C --> G[FastAPI Backend]
-
     F --> G
 
     G --> H[Next.js Dashboard]
 
-    H --> I[Interactive Charts]
-
-    H --> J[Market Signals]
-
+    H --> I[Candlestick Charts]
+    H --> J[Technical Signals]
     H --> K[ML Predictions]
 ```
 ## Technology Stack
