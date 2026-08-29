@@ -6,7 +6,7 @@
 ![XGBoost](https://img.shields.io/badge/XGBoost-ML-orange)
 ![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
 
-An end-to-end financial data science platform that combines data engineering, time-series analysis, feature engineering, machine learning, REST APIs, PostgreSQL, and interactive financial visualization into a production-style application.
+An end-to-end financial data science platform that combines data engineering, time-series analysis, feature engineering, machine learning, REST APIs, PostgreSQL, and interactive financial visualization into a professional data science application.
 
 The platform collects historical market data through an automated ETL pipeline, stores it in PostgreSQL, generates technical and statistical features, trains machine-learning classification models using chronological walk-forward validation, and exposes analytical results through a FastAPI backend and an interactive Next.js dashboard.
 
@@ -174,7 +174,6 @@ The broader platform supports the complete 30-symbol universe documented above.
 The dashboard communicates with the FastAPI backend using:
 
 - **REST API** for historical market data, OHLC analytics, and machine-learning predictions.
-- **WebSocket** infrastructure for market-data streaming.
 
 ---
 
@@ -399,25 +398,79 @@ Training Data 1 ─────► Test 1
 Training Data 1 + 2 ─────────► Test 2
 Training Data 1 + 2 + 3 ─────────────► Test 3
 
-This better reflects the real-world scenario in which a model learns from historical data and then makes predictions on future observations.
+This better reflects the real-world scenario in which a model learns from historical observations and then makes predictions on future observations.
 
 ### Evaluation Metrics
 
-The project evaluates classification performance using multiple complementary metrics:
+The platform evaluates classification performance using multiple complementary metrics:
 
-| Metric | Result |
-|---|---:|
-| Accuracy | 0.2596 |
-| Precision | 0.1724 |
-| Recall | 0.2596 |
-| F1 Score | 0.1328 |
-| ROC-AUC | 0.4954 |
+| Metric | Description |
+|---|---|
+| Accuracy | Proportion of correctly classified observations |
+| Precision | Proportion of predicted classes that were correct |
+| Recall | Proportion of actual classes correctly identified |
+| F1 Score | Harmonic mean of precision and recall |
+| ROC-AUC | Ability of the classifier to distinguish between classes |
+
+### Latest Model Evaluation Results
+
+The latest registered models for the primary dashboard watchlist are XGBoost classifiers evaluated using historical market data.
+
+| Symbol | Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
+|---|---|---:|---:|---:|---:|---:|
+| AAPL | XGBoost | 0.2464 | 0.4623 | 0.2464 | 0.1160 | 0.5341 |
+| MSFT | XGBoost | 0.4306 | 0.4328 | 0.4306 | 0.4177 | 0.5741 |
+| NVDA | XGBoost | 0.3923 | 0.3955 | 0.3923 | 0.3713 | 0.5720 |
+| SPY | XGBoost | 0.7129 | 0.5083 | 0.7129 | 0.5934 | 0.5497 |
+
+### Registered Model Versions
+
+| Symbol | Model Version |
+|---|---|
+| AAPL | 20260818_114727 |
+| MSFT | 20260818_114825 |
+| NVDA | 20260818_114840 |
+| SPY | 20260818_114858 |
 
 ### Interpretation
 
-The current validation results indicate that the models have limited predictive power on unseen market periods. The ROC-AUC score is close to 0.50, suggesting performance near random classification, while the relatively low F1 score indicates difficulty consistently identifying the three market-movement classes.
+Model performance varies substantially across financial instruments.
 
-These results are treated as an experimental baseline rather than evidence of a production-ready investment strategy.
+SPY currently has the strongest validation results among the four primary dashboard symbols, with an accuracy of approximately 71.3% and an F1 score of approximately 0.593. MSFT and NVDA show moderate performance, while AAPL has substantially weaker validation results.
+
+The ROC-AUC values range from approximately 0.53 to 0.57. These values indicate limited class-separation ability and should not be interpreted as evidence of strong predictive power.
+
+The relatively low F1 score for AAPL is particularly important because accuracy alone can be misleading in a multi-class classification problem.
+
+### Important Model Limitation
+
+These machine-learning results are experimental portfolio-project results and should not be interpreted as evidence of a profitable trading strategy.
+
+Financial markets are noisy, non-stationary, and difficult to predict consistently. Model confidence represents the classifier's output based on its probability distribution; it does **not** represent the probability that a trade will be profitable.
+
+The current results are therefore presented as a transparent baseline for evaluating the machine-learning pipeline and identifying opportunities for future improvement.
+
+Potential future improvements include:
+
+- Additional feature engineering
+- Hyperparameter optimization
+- Improved class handling
+- Alternative validation windows
+- Model calibration
+- Additional machine-learning algorithms
+- More robust out-of-sample testing
+- Comparison against simple baseline strategies
+
+### Relationship Between Validation and Dashboard Predictions
+
+The dashboard separates two analytical layers:
+
+1. **Technical Analysis** — rule-based signals derived from indicators such as MA7 and MA20.
+2. **Machine Learning** — three-class predictions generated by the registered classification model.
+
+Agreement between these layers is not treated as proof of predictive accuracy. Instead, the dashboard displays agreement or divergence to make the analytical process transparent.
+
+A model can produce a high-confidence prediction while still having relatively weak historical validation performance. This distinction is intentional and is documented directly in the dashboard.
 
 ---
 
@@ -436,6 +489,17 @@ The FastAPI backend provides services for:
 - Technical analytics
 - Market signals
 - Machine-learning predictions
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/` | API root |
+| GET | `/stocks` | Return available stock symbols |
+| GET | `/analytics/ohlc/{symbol}` | Return historical OHLC data and technical features |
+| GET | `/predict/{symbol}` | Generate and store a machine-learning prediction |
+| GET | `/predict/history/{symbol}` | Retrieve stored prediction history |
+| GET | `/etl/{symbol}` | Run market-data ETL for a symbol |
 
 ### API Documentation
 
@@ -665,7 +729,7 @@ Development & Deployment Practices
 * GitHub
 * Virtual environments
 * API documentation
-* Production-style application architecture
+* Professional application architecture
 
 ---
 

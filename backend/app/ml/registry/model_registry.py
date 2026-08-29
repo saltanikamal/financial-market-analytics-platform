@@ -263,7 +263,7 @@ class ModelRegistry:
         return registry[symbol]
 
     # =====================================
-    # SELECT BEST MODEL
+    # SELECT BEST CURRENT MODEL
     # =====================================
 
     def get_best_model(
@@ -271,10 +271,11 @@ class ModelRegistry:
         symbol
     ):
 
+        symbol = symbol.upper()
+
         models = self.get_models(
             symbol
         )
-
 
         if len(models) == 0:
 
@@ -282,50 +283,189 @@ class ModelRegistry:
                 f"No models available for {symbol}"
             )
 
+        # -------------------------------------
+        # Keep only models whose files exist.
+        # Registry paths are relative to the
+        # backend working directory.
+        # -------------------------------------
+
+        valid_models = []
+
+        for model in models:
+
+            model_path = model.get(
+                "path",
+                ""
+            )
+
+            if os.path.exists(
+                model_path
+            ):
+
+                valid_models.append(
+                    model
+                )
+
+        if len(valid_models) == 0:
+
+            raise ValueError(
+                f"No valid model files found for {symbol}"
+            )
 
         # -------------------------------------
-        # All current models in this project
-        # are multiclass classifiers.
+        # Keep only the newest version of each
+        # model type.
         #
-        # Older versions filtered models based
-        # on feature count, which was fragile.
+        # This prevents stale historical models
+        # from winning model selection.
         # -------------------------------------
 
-        multiclass_models = models
+        latest_by_model = {}
 
+        for model in valid_models:
 
-        best_model = max(
+            model_name = model.get(
+                "model",
+                ""
+            )
 
-            multiclass_models,
-
-            key=lambda x: (
-
-                x.get(
-                    "metrics",
-                    {}
-                ).get(
-                    "f1",
-                    0
-                ),
-
-                x.get(
-                    "metrics",
-                    {}
-                ).get(
-                    "accuracy",
-                    0
-                ),
-
-                x.get(
+            version = str(
+                model.get(
                     "version",
                     ""
                 )
-
             )
 
+            if (
+                model_name not in latest_by_model
+                or version > str(
+                    latest_by_model[
+                        model_name
+                    ].get(
+                        "version",
+                        ""
+                    )
+                )
+            ):
+
+                latest_by_model[
+                    model_name
+                ] = model
+
+        current_models = list(
+            latest_by_model.values()
         )
 
+        if len(current_models) == 0:
+
+            raise ValueError(
+                f"No current models available for {symbol}"
+            )
+
+        # -------------------------------------
+        # Model selection priority:
+        #
+        # 1. Highest F1
+        # 2. Highest accuracy
+        # 3. Newest version
+        #
+        # NaN/invalid metric values are treated
+        # as zero.
+        # -------------------------------------
+
+        def model_score(model):
+
+            metrics = model.get(
+                "metrics",
+                {}
+            )
+
+            f1 = metrics.get(
+                "f1",
+                0.0
+            )
+
+            accuracy = metrics.get(
+                "accuracy",
+                0.0
+            )
+
+            try:
+
+                f1 = float(f1)
+
+                if not np.isfinite(f1):
+
+                    f1 = 0.0
+
+            except (
+                TypeError,
+                ValueError
+            ):
+
+                f1 = 0.0
+
+            try:
+
+                accuracy = float(
+                    accuracy
+                )
+
+                if not np.isfinite(
+                    accuracy
+                ):
+
+                    accuracy = 0.0
+
+            except (
+                TypeError,
+                ValueError
+            ):
+
+                accuracy = 0.0
+
+            return (
+                f1,
+                accuracy,
+                str(
+                    model.get(
+                        "version",
+                        ""
+                    )
+                )
+            )
+
+        best_model = max(
+            current_models,
+            key=model_score
+        )
+
+        # -------------------------------------
+        # Log model selection for transparency.
+        # -------------------------------------
+
+        print(
+            f"Model selection for {symbol}:"
+        )
+
+        for model in current_models:
+
+            metrics = model.get(
+                "metrics",
+                {}
+            )
+
+            print(
+                f"  {model.get('model')} "
+                f"{model.get('version')} "
+                f"F1={metrics.get('f1')} "
+                f"Accuracy={metrics.get('accuracy')}"
+            )
+
+        print(
+            f"Selected model: "
+            f"{best_model.get('model')} "
+            f"{best_model.get('version')}"
+        )
 
         return best_model
-
-

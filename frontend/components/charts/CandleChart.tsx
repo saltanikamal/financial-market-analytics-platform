@@ -30,75 +30,92 @@ export default function CandleChart({
       return;
     }
 
-    // Clear any previous chart instance
     container.innerHTML = "";
+
+    // ------------------------------------------
+    // CREATE CHART
+    // ------------------------------------------
 
     const chart = createChart(container, {
       width: container.clientWidth || 900,
-      height: 500,
+      height: 520,
 
       layout: {
         background: {
-          color: "#0f172a",
+          color: "#0b1220",
         },
-        textColor: "#ffffff",
+        textColor: "#94a3b8",
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
       },
 
       grid: {
         vertLines: {
-          color: "#1f2937",
+          color: "#172033",
         },
         horzLines: {
-          color: "#1f2937",
+          color: "#172033",
         },
       },
 
       rightPriceScale: {
-        borderColor: "#334155",
+        borderColor: "#263247",
+        textColor: "#94a3b8",
+        scaleMargins: {
+          top: 0.08,
+          bottom: 0.08,
+        },
       },
 
       timeScale: {
-        borderColor: "#334155",
-        timeVisible: true,
+        borderColor: "#263247",
+        timeVisible: false,
         secondsVisible: false,
+        rightOffset: 5,
+        barSpacing: 7,
+        minBarSpacing: 3,
       },
 
       crosshair: {
+        mode: 1,
+
         vertLine: {
           color: "#64748b",
+          width: 1,
+          style: 2,
+          labelBackgroundColor: "#1e293b",
         },
+
         horzLine: {
           color: "#64748b",
+          width: 1,
+          style: 2,
+          labelBackgroundColor: "#1e293b",
         },
+      },
+
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: true,
+      },
+
+      handleScale: {
+        axisPressedMouseMove: true,
+        mouseWheel: true,
+        pinch: true,
       },
     });
 
-    /*
-     * Your installed lightweight-charts version uses:
-     *
-     * chart.addCandlestickSeries()
-     *
-     * Do NOT import CandlestickSeries.
-     */
-    const candleSeries = chart.addCandlestickSeries({
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      borderUpColor: "#22c55e",
-      borderDownColor: "#ef4444",
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
-    });
-
     // ------------------------------------------
-    // DATA CLEANING
+    // CANDLE DATA CLEANING
     // ------------------------------------------
 
     const seen = new Set<string>();
 
     const cleaned = data
       .map((d) => {
-        // lightweight-charts accepts YYYY-MM-DD strings
-        // as valid Time values.
         const date = String(d.date).split("T")[0];
 
         return {
@@ -110,7 +127,6 @@ export default function CandleChart({
         };
       })
 
-      // Remove invalid records
       .filter((d) => {
         return (
           /^\d{4}-\d{2}-\d{2}$/.test(d.time) &&
@@ -121,7 +137,6 @@ export default function CandleChart({
         );
       })
 
-      // Remove duplicate dates
       .filter((d) => {
         if (seen.has(d.time)) {
           return false;
@@ -132,39 +147,52 @@ export default function CandleChart({
         return true;
       })
 
-      // Chart requires ascending chronological order
-      .sort((a, b) => {
-        return a.time.localeCompare(b.time);
+      .sort((a, b) =>
+        a.time.localeCompare(b.time)
+      );
+
+    // ------------------------------------------
+    // CANDLE SERIES
+    // ------------------------------------------
+
+    const candleSeries =
+      chart.addCandlestickSeries({
+        upColor: "#22c55e",
+        downColor: "#ef4444",
+
+        borderUpColor: "#22c55e",
+        borderDownColor: "#ef4444",
+
+        wickUpColor: "#22c55e",
+        wickDownColor: "#ef4444",
       });
 
-    console.log(
-      "CLEANED CANDLES:",
-      cleaned.length
-    );
-
-    // Load cleaned data into the candlestick series
     candleSeries.setData(cleaned);
 
-    // Fit all available candles into the chart
+    // ------------------------------------------
+    // FIT CHART TO DATA
+    // ------------------------------------------
+
     chart.timeScale().fitContent();
 
     // ------------------------------------------
     // RESPONSIVE RESIZE
     // ------------------------------------------
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (!container) {
-        return;
-      }
+    const resizeObserver =
+      new ResizeObserver(() => {
+        if (!container) {
+          return;
+        }
 
-      const width = container.clientWidth;
+        const width = container.clientWidth;
 
-      if (width > 0) {
-        chart.applyOptions({
-          width,
-        });
-      }
-    });
+        if (width > 0) {
+          chart.applyOptions({
+            width,
+          });
+        }
+      });
 
     resizeObserver.observe(container);
 
@@ -181,9 +209,10 @@ export default function CandleChart({
   return (
     <div
       ref={containerRef}
+      className="w-full overflow-hidden rounded-lg"
       style={{
         width: "100%",
-        height: 500,
+        height: 520,
       }}
     />
   );
