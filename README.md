@@ -6,11 +6,22 @@
 ![XGBoost](https://img.shields.io/badge/XGBoost-ML-orange)
 ![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
 
-An end-to-end financial data science platform that combines data engineering, time-series analysis, feature engineering, machine learning, REST APIs, PostgreSQL, and interactive financial visualization into a professional data science application.
+An end-to-end financial data science application that integrates automated market-data ingestion, PostgreSQL, feature engineering, time-series machine learning, model evaluation, REST APIs, and interactive financial visualization.
 
-The platform collects historical market data through an automated ETL pipeline, stores it in PostgreSQL, generates technical and statistical features, trains machine-learning classification models using chronological walk-forward validation, and exposes analytical results through a FastAPI backend and an interactive Next.js dashboard.
+The platform collects historical market data through an automated ETL pipeline, validates and stores the data in PostgreSQL, generates technical and statistical features, trains machine-learning classification models using chronological walk-forward validation, registers model artifacts and evaluation metadata, and exposes analytical results through a FastAPI backend and interactive Next.js dashboard.
 
-Portfolio project: Machine-learning predictions are experimental analytical signals and should not be interpreted as financial advice or used as a standalone basis for investment decisions.
+### Portfolio Highlights
+
+- **Data Engineering:** Automated ETL, validation, scheduled ingestion, and PostgreSQL persistence.
+- **Data Science:** Technical and statistical feature engineering for financial time-series data.
+- **Machine Learning:** Random Forest and XGBoost multiclass classification for BUY / HOLD / SELL signals.
+- **Time-Series Validation:** Chronological walk-forward validation designed to avoid random mixing of historical and future observations.
+- **Model Management:** Versioned model artifacts, evaluation metadata, and metric-based model selection.
+- **Backend Engineering:** FastAPI REST services for market data, analytics, predictions, and prediction history.
+- **Frontend Engineering:** Next.js, React, TypeScript, and interactive financial visualization.
+- **Engineering Practices:** Modular project structure, environment-based configuration, documentation, testing, and Git version control.
+
+> **Portfolio project:** Machine-learning predictions are experimental analytical signals and should not be interpreted as financial advice or used as a standalone basis for investment decisions.
 
 ---
 
@@ -232,7 +243,7 @@ The FastAPI backend provides services for:
 * Machine-learning predictions
 * Market signals
 
-Interactive Frontend
+### Interactive Frontend
 
 The Next.js dashboard provides a visual interface for:
 
@@ -648,15 +659,20 @@ http://localhost:3000
 
 ## Documentation
 
-Additional project documentation is available in:
+The repository includes additional documentation for the major components of the platform:
 
-backend/README.md
-frontend/README.md
-docs/
-
-The documentation covers the backend, frontend, data pipeline, machine-learning workflow, and project architecture.
+| Documentation | Description |
+|---|---|
+| [System Architecture](docs/architecture.md) | High-level platform architecture and component relationships |
+| [Backend](backend/docs/backend.md) | FastAPI services, endpoints, and backend design |
+| [Database](backend/docs/database.md) | PostgreSQL schema, data storage, and database design |
+| [ML Pipeline](backend/docs/ml-pipeline.md) | Feature engineering, model training, validation, and evaluation |
+| [Backend Architecture](backend/docs/system-architecture.md) | Backend-specific architecture and data flow |
+| [Backend README](backend/README.md) | Backend setup and development instructions |
+| [Frontend README](frontend/README.md) | Next.js dashboard setup and development instructions |
 
 ---
+
 
 ## Limitations
 
