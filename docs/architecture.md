@@ -33,14 +33,77 @@ These components work together as a single application while remaining modular a
                               ▼
                      PostgreSQL Database
                               │
+                              ▼
+                    Feature Engineering
+                              │
+                              ▼
+                  39 Model Input Features
+                              │
+                              ▼
+                 Machine Learning Pipeline
+                 (XGBoost / Random Forest)
+                              │
+                              ▼
+                 5-Fold Expanding
+                 Walk-Forward Validation
+                              │
+                              ▼
+              Final Chronological 80/20
+                    Evaluation
+                              │
+                              ▼
+                   Model Artifact
+                              │
+                              ▼
+                Model Registry / Selection
+                              │
+                              ▼
+                    FastAPI Backend
+                              │
+                              ▼
+                       REST API
+                              │
+                              ▼
+                    Next.js Dashboard
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+              Interactive Charts   ML Predictions
+                                  & Market Signals
+```text
+                         Yahoo Finance
+                              │
+                              ▼
+                    APScheduler / ETL
+                              │
+                              ▼
+                     Data Validation
+                              │
+                              ▼
+                     PostgreSQL Database
+                              │
                  ┌────────────┴────────────┐
                  │                         │
                  ▼                         ▼
         Feature Engineering          Historical Data
                  │                         │
                  ▼                         │
+        39 Model Input Features            │
+                 │                         │
+                 ▼                         │
         Machine Learning Pipeline          │
         (XGBoost / Random Forest)          │
+                 │                         │
+                 ▼                         │
+        5-Fold Expanding                  │
+        Walk-Forward Validation            │
+                 │                         │
+                 └────────────┬────────────┘
+                              ▼
+            Final Chronological 80/20 Evaluation
+                              │
+                              ▼
+            Model Registry / Model Selection
                  │                         │
                  ▼                         │
             Model Registry                 │
