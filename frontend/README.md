@@ -10,7 +10,7 @@ The frontend provides an interactive interface for analyzing historical market d
 
 The frontend is responsible for the presentation and visualization layer of the platform.
 
-It connects to the backend through REST APIs and WebSocket infrastructure to display:
+It connects to the FastAPI backend through REST APIs to display:
 
 - Historical OHLC market data
 - Interactive candlestick charts
@@ -39,7 +39,6 @@ The dashboard is designed as a production-style financial analytics interface ra
 | Tailwind CSS | Styling and responsive layout |
 | Lightweight Charts | Financial candlestick visualization |
 | REST API | Backend communication |
-| WebSocket | Market-data streaming |
 | FastAPI | Backend service |
 
 ---
@@ -146,3 +145,5 @@ Example:
 Bearish    32.17%
 Neutral    37.79%
 Bullish    30.03%
+
+```
