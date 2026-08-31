@@ -6,7 +6,7 @@ The Financial Market Analytics Platform uses PostgreSQL as the primary data stor
 
 The database provides persistent storage for OHLCV market information collected through the ETL pipeline and serves as the foundation for analytics, feature engineering, and machine learning workflows.
 
-The database layer separates data storage from application logic, allowing the backend services and machine learning components to access consistent and structured market data.
+The database layer separates data storage from application logic, allowing backend services and machine learning components to access consistent and structured market data.
 
 ---
 
@@ -48,7 +48,7 @@ The database acts as the central data source connecting the ETL pipeline, backen
 
 The database schema is designed to store historical financial market data in a structured format that supports analytics, visualization, and machine learning workflows.
 
-The primary table used by the platform is:
+The primary table used by the platform is the `stock_prices` table.
 
 This table stores historical OHLCV data for multiple financial instruments.
 
@@ -67,15 +67,16 @@ stock_prices
 | close          |
 | volume         |
 +----------------+
+```
 
-XDesign Considerations
+### Design Considerations
 
 The schema follows these principles:
 
-* Each record represents one trading day for one financial instrument.
-* Historical observations are stored chronologically.
-* Multiple symbols are supported within the same table.
-* The structure supports both analytics queries and machine learning feature generation.
+- Each record represents one trading day for one financial instrument.
+- Historical observations are stored chronologically.
+- Multiple symbols are supported within the same table.
+- The structure supports analytics queries and machine learning feature generation.
 
 The schema provides a consistent data foundation for the ETL pipeline, backend services, and prediction workflows.
 
@@ -106,7 +107,7 @@ Each row represents the trading information for a specific financial instrument 
 Date        Symbol   Open     High     Low      Close
 ------------------------------------------------------
 2026-07-27  AAPL     214.45   216.30   213.80   215.50
-
+```
 
 ---
 
@@ -132,6 +133,18 @@ PostgreSQL Database
         |
         v
 Analytics and ML Services
+```
+
+### Database Workflow
+
+The database participates in the following workflow:
+
+1. Market data is collected through the ETL pipeline.
+2. Data is validated before storage.
+3. Historical OHLCV records are stored in PostgreSQL.
+4. Backend analytics endpoints retrieve market data.
+5. Machine learning workflows retrieve historical data for feature engineering.
+6. Prediction services use processed market data to generate model predictions.
 
 ---
 
@@ -145,15 +158,119 @@ The platform uses database optimization strategies to improve retrieval speed fo
 
 Indexes can be created on frequently queried columns:
 
-- Symbol
-- Date
-- Symbol and date combinations
+- `symbol`
+- `date`
+- `(symbol, date)`
 
 Example:
 
 ```sql
 CREATE INDEX idx_stock_symbol_date
 ON stock_prices(symbol, date);
+```
+
+A composite index on `symbol` and `date` can improve queries that retrieve historical data for a specific financial instrument over a time range.
+
+---
+
+## Data Integrity
+
+Data integrity is important because historical market data is used by both analytics services and machine learning workflows.
+
+The database design supports:
+
+- Structured OHLCV records.
+- Consistent ticker symbols.
+- Trading-date tracking.
+- Numeric market-price fields.
+- Historical data retrieval by symbol and date.
+
+Validation is also performed during the ETL process before market data is used by downstream services.
+
+---
+
+## Relationship to Machine Learning
+
+PostgreSQL provides the historical dataset used by the machine learning pipeline.
+
+The workflow is:
+
+```text
+PostgreSQL
+     |
+     v
+Historical OHLCV Data
+     |
+     v
+Feature Engineering
+     |
+     v
+Training Dataset
+     |
+     v
+Classification Models
+     |
+     v
+Predictions
+```
+
+The machine learning pipeline generates technical and statistical features from historical market observations.
+
+These features are then used by classification models to predict future market direction as:
+
+- SELL
+- HOLD
+- BUY
+
+The database therefore serves as an important data foundation for the machine learning workflow.
+
+---
+
+## Relationship to Backend Services
+
+The FastAPI backend retrieves financial data from PostgreSQL for analytics and prediction endpoints.
+
+The general request flow is:
+
+```text
+Next.js Dashboard
+        |
+        v
+FastAPI Backend
+        |
+        v
+SQLAlchemy
+        |
+        v
+PostgreSQL
+        |
+        v
+Historical Market Data
+```
+
+For prediction requests, the backend combines database data with the machine learning pipeline:
+
+```text
+Prediction Request
+        |
+        v
+FastAPI
+        |
+        v
+PostgreSQL
+        |
+        v
+Feature Engineering
+        |
+        v
+Registered ML Model
+        |
+        v
+Prediction
+        |
+        v
+Dashboard
+```
 
 ---
 
