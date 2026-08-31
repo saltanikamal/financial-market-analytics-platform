@@ -37,7 +37,7 @@ These components work together as a single application while remaining modular a
                     Feature Engineering
                               │
                               ▼
-                  39 Model Input Features
+                  40 Model Input Features
                               │
                               ▼
                  Machine Learning Pipeline
@@ -88,7 +88,7 @@ These components work together as a single application while remaining modular a
         Feature Engineering          Historical Data
                  │                         │
                  ▼                         │
-        39 Model Input Features            │
+        40 Model Input Features            │
                  │                         │
                  ▼                         │
         Machine Learning Pipeline          │
