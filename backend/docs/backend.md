@@ -1,327 +1,872 @@
-# Backend Architecture
+Backend Documentation
 
-## Overview
+1. Backend Architecture
 
-The backend layer of the Financial Market Analytics Platform is built using FastAPI and provides REST API services that connect the database, machine learning pipeline, and frontend dashboard.
+The backend of the Financial Market Analytics Platform provides the API, data-access, analytics, machine-learning prediction, and scheduling services that support the application.
 
-The backend is responsible for retrieving market data, serving analytics results, loading trained machine learning models, and providing prediction services to client applications.
+The backend is implemented with FastAPI and uses PostgreSQL as the persistent storage layer.
 
-The backend follows a modular architecture that separates API routes, business logic, database access, and machine learning services.
+The main backend workflow is:
 
----
+Market Data
+    │
+    ▼
+ETL / Scheduler
+    │
+    ▼
+PostgreSQL
+    │
+    ├───────────────┐
+    ▼               ▼
+Analytics       Feature Engineering
+    │               │
+    │               ▼
+    │          ML Models
+    │               │
+    │               ▼
+    │          Model Registry
+    │               │
+    └───────┬───────┘
+            ▼
+        FastAPI API
+            │
+            ▼
+      Next.js Dashboard
 
-## Backend Structure
+The backend separates data ingestion, database access, analytics, machine learning, and API responsibilities so that each component can be developed and tested independently.
 
-The backend follows a modular structure that separates API routes, database operations, machine learning workflows, and application configuration.
 
-The main components are organized as follows:
+2. Backend Overview
 
-```text
+The backend is responsible for:
+
+* Providing REST API endpoints.
+* Retrieving historical market data.
+* Serving OHLC financial data to the dashboard.
+* Calculating dashboard-oriented technical indicators.
+* Loading trained machine-learning models.
+* Generating BUY, HOLD, and SELL predictions.
+* Returning prediction probabilities and confidence information.
+* Managing model versions through a model registry.
+* Running scheduled market-data ingestion.
+* Supporting machine-learning training workflows.
+* Validating financial data before it is used by downstream components.
+
+The backend is designed as a modular application rather than a single monolithic script.
+
+
+3. Technology Stack
+
+Backend Framework
+
+* FastAPI
+* Uvicorn
+* Python
+
+Database
+
+* PostgreSQL
+* SQLAlchemy ORM
+
+Data Processing
+
+* Pandas
+* NumPy
+* yfinance
+
+Machine Learning
+
+* Scikit-learn
+* Random Forest
+* XGBoost
+
+Scheduling
+
+* APScheduler
+
+API Documentation
+
+FastAPI automatically provides interactive API documentation.
+
+The primary documentation interfaces are:
+
+http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/redoc
+
+
+4. Backend Directory Structure
+
+The backend is organized into application, API, database, machine-learning, and supporting components.
+
+A simplified structure is:
+
 backend/
-│
 ├── app/
+│   ├── main.py
 │   │
 │   ├── api/
 │   │   ├── stocks.py
 │   │   ├── analytics.py
 │   │   └── predictions.py
 │   │
+│   ├── db/
+│   │   ├── database.py
+│   │   └── models.py
+│   │
 │   ├── ml/
+│   │   ├── data_loader.py
 │   │   ├── feature_engineering.py
+│   │   ├── feature_validator.py
 │   │   ├── train.py
-│   │   └── registry/
-│   │       └── model_registry.py
+│   │   ├── predictor.py
+│   │   ├── model_registry.py
+│   │   └── models/
 │   │
-│   ├── database/
-│   │
-│   ├── models/
-│   │
-│   └── main.py
+│   └── ...
+│
+├── docs/
+│   └── backend.md
 │
 └── requirements.txt
 
----
 
-## API Endpoints
+5. FastAPI Application
 
-The FastAPI backend exposes REST endpoints that provide access to market data, analytics, and machine learning predictions.
+The main FastAPI application is defined in:
 
-The API layer acts as the communication interface between the backend services and the frontend dashboard.
+backend/app/main.py
 
-## Market Data Endpoints
+The application initializes the API and registers the different API routers.
 
-### Retrieve Historical OHLC and Technical Indicator Data
+The backend exposes functionality through separate route modules rather than placing all endpoints inside main.py.
 
-Returns historical market data required for financial visualization.
+This separation improves maintainability and makes it easier to extend the platform.
 
-Response includes:
 
-- Date
-- Symbol
-- Open price
-- High price
-- Low price
-- Closing price
-- Volume
-- Technical indicators
+6. API Modules
 
-Example:
+6.1 Stocks API
 
-```json
-{
-  "symbol": "AAPL",
-  "available": true,
-  "count": 1037,
-  "data": [
-    {
-      "date": "2022-05-27",
-      "symbol": "AAPL",
-      "open": 145.39,
-      "high": 149.68,
-      "low": 145.25,
-      "close": 149.64,
-      "volume": 90978500,
-      "ma7": 148.32,
-      "ma20": 150.45
-    }
-  ]
-}
-```
+The stocks API provides access to supported market symbols and stock-related functionality.
 
----
+The application currently supports a 30-symbol market universe, including:
 
-## Database Integration
+AAPL
+AMD
+AMZN
+AVGO
+BAC
+CAT
+COST
+CVX
+DIA
+GE
+GOOGL
+GS
+HD
+JNJ
+JPM
+LLY
+MA
+META
+MS
+MSFT
+NFLX
+NVDA
+ORCL
+QQQ
+SPY
+TSLA
+UNH
+V
+WMT
+XOM
+
+The primary dashboard watchlist focuses on:
+
+AAPL
+MSFT
+NVDA
+SPY
+
+
+7. Analytics API
+
+The analytics functionality is implemented in:
+
+backend/app/api/analytics.py
+
+The main dashboard endpoint is:
+
+GET /analytics/ohlc/{symbol}
+
+For example:
+
+GET /analytics/ohlc/AAPL
+
+The endpoint returns historical OHLC data used by the frontend financial chart.
+
+The response contains market information such as:
+
+date
+open
+high
+low
+close
+volume
+
+The endpoint also supports dashboard-oriented moving averages.
+
+The current dashboard implementation calculates:
+
+MA7
+MA20
+
+These indicators are calculated for visualization without requiring the complete machine-learning feature-engineering pipeline.
+
+This design keeps the chart endpoint lightweight and avoids unnecessary ML processing when the dashboard only needs historical price information.
+
+
+8. OHLC Data Flow
+
+The OHLC request follows this general workflow:
+
+Frontend
+   │
+   │ GET /analytics/ohlc/AAPL
+   ▼
+FastAPI
+   │
+   ▼
+Analytics Router
+   │
+   ▼
+PostgreSQL
+   │
+   ▼
+Historical OHLC Data
+   │
+   ▼
+MA7 / MA20 Calculation
+   │
+   ▼
+JSON Response
+   │
+   ▼
+Next.js Dashboard
+
+The frontend converts the returned numerical values into chart data and displays them using the financial chart component.
+
+
+9. Database Integration
 
 The backend uses PostgreSQL as the persistent storage layer for historical financial market data.
 
-The database layer provides structured access to market information used by analytics services and machine learning workflows.
+The database layer provides structured access to market information used by analytics services and machine-learning workflows.
 
-### Database Technology
+Database Technology
 
-- PostgreSQL
-- SQLAlchemy ORM
+* PostgreSQL
+* SQLAlchemy ORM
 
-### Database Responsibilities
+Database Responsibilities
 
 The database layer handles:
 
-- Storing historical OHLCV market data.
-- Retrieving financial data for analytics endpoints.
-- Providing datasets for feature engineering.
-- Maintaining structured market information.
+* Storing historical OHLCV market data.
+* Retrieving financial data for analytics endpoints.
+* Providing datasets for feature engineering.
+* Maintaining structured market information.
+* Supporting historical analysis.
+* Providing training data to machine-learning workflows.
 
-### Stock Price Data Model
+Database
 
-The primary market data table is:
+The primary project database is:
 
-The table stores:
+stockdb
 
-- Date
-- Symbol
-- Open price
-- High price
-- Low price
-- Closing price
-- Volume
-- Technical indicators
+The main market-data table is:
 
-### Data Flow
-
-```text
-Yahoo Finance API
-        |
-        v
-ETL Pipeline
-        |
-        v
-PostgreSQL Database
-        |
-        v
-FastAPI Backend
-        |
-        v
-Dashboard / ML Services
-
----
-
-## Machine Learning Integration
-
-The backend integrates the machine learning pipeline to provide real-time market direction predictions through API services.
-
-The prediction service connects the trained models, feature engineering pipeline, and model registry with the FastAPI application.
-
-### Prediction Workflow
-
-When a prediction request is received, the backend performs the following steps:
-
-1. Receive a prediction request for a financial symbol.
-2. Retrieve historical market data from PostgreSQL.
-3. Apply the feature engineering pipeline.
-4. Load the selected model from the model registry.
-5. Generate prediction probabilities.
-6. Return the final BUY, HOLD, or SELL signal.
-
-### ML Components Used
-
-The backend communicates with:
-
-- Feature engineering module.
-- Trained classification models.
-- Model registry.
-- Prediction service.
-
-### Prediction Output
-
-The API returns:
-
-- Financial symbol.
-- Predicted signal.
-- Confidence score.
-- Model version information.
-
-Example workflow:
-
-```text
-GET /predict/AAPL
-
-        |
-        v
-
-Retrieve Market Data
-
-        |
-        v
-
-Generate Features
-
-        |
-        v
-
-Load Registered Model
-
-        |
-        v
-
-Predict BUY / HOLD / SELL
-
-        |
-        v
-
-Return JSON Response
+stock_prices
 
 
----
+10. Stock Price Data Model
 
-## Prediction Workflow
+The stock_prices table stores historical market information for each supported symbol.
 
-The prediction workflow describes how a user request is processed from the frontend dashboard to the machine learning prediction response.
+The primary market fields include:
 
-### Prediction Request Flow
+symbol
+date
+open
+high
+low
+close
+volume
 
-```text
-User selects stock symbol
-          |
-          v
-Next.js Dashboard
-          |
-          v
-FastAPI Prediction Endpoint
-          |
-          v
-Retrieve Historical Market Data
-          |
-          v
-Feature Engineering Pipeline
-          |
-          v
-Load Registered ML Model
-          |
-          v
-Generate Prediction
-          |
-          v
-Return BUY / HOLD / SELL Signal
+The combination of symbol and date identifies a unique market observation.
 
-### Prediction Response
+Data validation is used to ensure that duplicate symbol/date records are not introduced into the dataset.
 
-The backend returns a structured JSON response containing:
 
-- Symbol
-- Predicted signal
-- Confidence score
-- Model version
-- Prediction metadata
+11. Data Ingestion and ETL
+
+Market data is collected using yfinance.
+
+The ETL workflow retrieves historical financial data and stores it in PostgreSQL.
+
+The general process is:
+
+Yahoo Finance
+      │
+      ▼
+Data Retrieval
+      │
+      ▼
+Validation
+      │
+      ▼
+Transformation
+      │
+      ▼
+PostgreSQL
+
+The scheduler supports automated market-data ingestion.
+
+The current system monitors a 30-symbol watchlist.
+
+The ETL process has been validated across the supported universe, with successful ingestion for the monitored symbols.
+
+
+12. Scheduler
+
+The backend uses APScheduler to automate recurring operations.
+
+The scheduler is responsible for maintaining current market data and supporting periodic model-related workflows.
+
+The architecture supports scheduled operations such as:
+
+Market-data ingestion
+Model retraining
+
+The market-data scheduler runs independently of individual API requests.
+
+This allows the API to serve stored data without having to download market data every time a user opens the dashboard.
+
+
+13. Machine Learning Integration
+
+The machine-learning components are located under:
+
+backend/app/ml/
+
+The ML subsystem contains separate components for:
+
+* Data loading.
+* Feature engineering.
+* Feature validation.
+* Model training.
+* Model prediction.
+* Model registration.
+* Model selection.
+
+The current machine-learning workflow uses classification rather than regression.
+
+The model predicts market direction using three classes:
+
+0 = SELL
+1 = HOLD
+2 = BUY
+
+
+14. Feature Engineering
+
+Feature engineering is implemented in:
+
+backend/app/ml/feature_engineering.py
+
+The feature pipeline derives technical and statistical information from historical OHLCV data.
+
+The current feature set includes indicators such as:
+
+* Moving averages.
+* EMA12.
+* EMA26.
+* RSI.
+* MACD.
+* Bollinger Bands.
+* Momentum.
+* Volatility.
+* Volume change.
+
+The prediction horizon is:
+
+5 trading periods
+
+The target is generated from future price movement.
+
+The classification framework uses thresholds to distinguish BUY, HOLD, and SELL outcomes.
+
+The feature-engineering process is applied consistently during training and prediction.
+
+
+15. Feature Validation
+
+Feature validation is handled by:
+
+backend/app/ml/feature_validator.py
+
+The purpose of feature validation is to identify invalid or unusable model inputs before they reach the prediction stage.
+
+Validation helps detect issues such as:
+
+* Missing values.
+* Invalid numerical values.
+* Unexpected feature columns.
+* Incorrect feature dimensions.
+* Incompatible model inputs.
+
+This provides an additional protection layer between raw financial data and the machine-learning models.
+
+
+16. Machine-Learning Models
+
+The platform currently supports:
+
+Random Forest
+XGBoost
+
+Both models are trained as classification models.
+
+The models are stored as versioned artifacts and registered in the model registry.
+
+The ML system can therefore maintain multiple trained models and compare their evaluation results.
+
+
+17. Walk-Forward Validation
+
+Financial time-series data cannot be evaluated reliably using a conventional random train/test split because randomly mixing historical observations can introduce future information into the training dataset.
+
+The project therefore uses walk-forward validation.
+
+The general process is:
+
+Historical Data
+Training Window
+       │
+       ▼
+Validation/Test Window
+       │
+       ▼
+Expand Training Window
+       │
+       ▼
+Next Test Window
+       │
+       ▼
+Repeat
+
+This approach preserves chronological ordering and provides a more realistic estimate of how the model would behave on future observations.
+
+The evaluation process measures classification performance using metrics including:
+
+* Accuracy.
+* Precision.
+* Recall.
+* F1 score.
+* ROC-AUC.
+
+Because the financial classification problem is imbalanced, weighted metrics are particularly important when comparing models.
+
+
+18. Model Registry
+
+The model registry manages trained model artifacts and their associated metadata.
+
+The registry contains information such as:
+
+model type
+symbol
+model version
+training information
+evaluation metrics
+model artifact location
+
+A registry file is maintained under the ML model infrastructure.
+
+The model registry allows the prediction system to identify registered models without hard-coding a single model file into the API.
+
+
+19. Model Selection
+
+The platform supports model comparison through evaluation metrics.
+
+The model-selection strategy considers model performance rather than simply selecting a model because it is newer or more complex.
+
+The current registry can compare Random Forest and XGBoost models using evaluation metrics such as weighted F1.
+
+This is important because a more sophisticated model is not automatically a better model.
+
+For example, if two models have nearly identical evaluation results, the registry can select the model with the stronger measured performance rather than assuming XGBoost must outperform Random Forest.
+
+
+20. Prediction API
+
+The prediction functionality is implemented through:
+
+GET /predict/{symbol}
 
 Example:
 
-```json
-{
-  "symbol": "AAPL",
-  "signal": "BUY",
-  "confidence": 0.78,
-  "model_version": "20260727_205242"
-}
+GET /predict/AAPL
 
-One important improvement: make sure the example matches your **actual predictor output**. Earlier in your project your predictor included:
+The prediction workflow is:
 
-- `symbol`
-- `signal` (BUY/HOLD/SELL)
-- `confidence`
-- model information/version
+API Request
+    │
+    ▼
+Load Historical Data
+    │
+    ▼
+Feature Engineering
+    │
+    ▼
+Feature Validation
+    │
+    ▼
+Load Registered Model
+    │
+    ▼
+Generate Prediction
+    │
+    ▼
+Calculate Probabilities
+    │
+    ▼
+Calculate Confidence
+    │
+    ▼
+Return JSON
 
----
 
-## Error Handling
+21. Prediction Response
 
-The backend includes validation and error handling mechanisms to provide reliable API behavior.
+A prediction response contains information describing the current model prediction.
 
-### API Validation
+Typical fields include:
 
-The API validates incoming requests to ensure:
+symbol
+signal
+probability
+confidence
+current_price
+model
+model_version
 
-- Valid financial symbols are provided.
-- Required parameters are included.
-- Requested resources are available.
+The signal is translated into a human-readable market classification:
 
-### Common Error Cases
+BUY
+HOLD
+SELL
 
-The backend handles situations such as:
+The response also identifies the model and model version used to produce the prediction.
 
-- Missing market data.
-- Invalid stock symbols.
-- Unavailable machine learning models.
-- Database access failures.
+This improves reproducibility and makes the prediction traceable to a specific trained model.
 
-Clear error responses allow frontend applications to handle failures gracefully.
 
----
+22. Prediction Confidence
 
-## Future Improvements
+The prediction system calculates a confidence score using model probability and the separation between the strongest and competing probabilities.
 
-The backend architecture provides a foundation for additional production capabilities.
+The confidence calculation combines:
 
-Potential improvements include:
+Prediction probability
++
+Probability margin
 
-### Cloud Deployment
+The implementation uses a weighted combination of these values.
 
-- Deploy FastAPI services on AWS infrastructure.
-- Use managed database services.
-- Implement automated deployment pipelines.
+The purpose of the confidence score is to provide additional context around the model prediction rather than presenting the classification alone.
 
-### Performance Optimization
+Confidence should not be interpreted as a guarantee that the prediction will be correct.
 
-- Add database indexing for faster queries.
-- Implement caching for frequently requested market data.
-- Optimize model loading and inference.
 
-### Advanced API Features
+23. Important Model Limitation
 
-- User authentication and authorization.
-- API rate limiting.
-- WebSocket support for real-time market updates.
+The machine-learning component is an experimental analytical system and should not be interpreted as a financial-advisory system.
 
-### MLOps Integration
+Financial markets are affected by many variables that are not represented in the current feature set.
 
-- Automated model retraining.
-- Model performance monitoring.
-- Prediction drift detection.
+Examples include:
+
+* Macroeconomic events.
+* Interest-rate changes.
+* Earnings announcements.
+* Geopolitical events.
+* Market sentiment.
+* Unexpected company-specific events.
+* Changes in market regime.
+
+Therefore:
+
+Model prediction ≠ guaranteed future market movement
+
+The purpose of the ML component is to demonstrate an end-to-end data-science workflow involving financial data, feature engineering, time-series validation, classification, model comparison, and API deployment.
+
+
+24. API Error Handling
+
+The backend validates requested symbols and handles failures from the underlying data and model layers.
+
+Potential API failures include:
+
+* Unsupported symbols.
+* Missing historical data.
+* Database connection problems.
+* Missing registered models.
+* Missing model artifacts.
+* Invalid feature data.
+* Model prediction errors.
+
+Errors should be returned through appropriate HTTP responses rather than allowing internal exceptions to produce unexplained application failures.
+
+
+25. Backend and Frontend Integration
+
+The backend communicates with the Next.js frontend through HTTP REST endpoints.
+
+The primary data flow is:
+
+Next.js Dashboard
+       │
+       │ HTTP Request
+       ▼
+FastAPI Backend
+       │
+       ├── Analytics API
+       │
+       └── Prediction API
+       │
+       ▼
+PostgreSQL / ML Models
+       │
+       ▼
+JSON Response
+       │
+       ▼
+Next.js Dashboard
+
+The frontend is therefore separated from the backend data and machine-learning implementation.
+
+This allows the backend to be tested independently using API tools such as curl or the FastAPI Swagger interface.
+
+
+26. API Testing
+
+Backend endpoints can be tested directly without the frontend.
+
+For example:
+
+curl http://127.0.0.1:8000/analytics/ohlc/AAPL
+
+Prediction testing can be performed with:
+
+curl http://127.0.0.1:8000/predict/AAPL
+
+FastAPI’s interactive documentation can also be used to inspect and test endpoints:
+
+http://127.0.0.1:8000/docs
+
+Testing the backend independently helps isolate API, database, and machine-learning issues from frontend problems.
+
+
+27. Data Validation Results
+
+The market-data pipeline has been validated against the supported dataset.
+
+Validation checks include:
+
+* Record counts.
+* Date ranges.
+* Duplicate symbol/date records.
+* NULL OHLC values.
+* Successful ETL execution.
+* API response status.
+* Consistency between database and API data.
+
+The platform has successfully ingested the monitored 30-symbol universe through the ETL workflow.
+
+The primary dashboard symbols are:
+
+AAPL
+MSFT
+NVDA
+SPY
+
+These symbols are used for the primary portfolio demonstration and dashboard visualization.
+
+
+28. Backend Development Principles
+
+The backend follows several design principles.
+
+Separation of Responsibilities
+
+Each component has a specific responsibility:
+
+API
+Data Access
+ETL
+Feature Engineering
+Model Training
+Model Registry
+Prediction
+
+Reproducibility
+
+Model versions and metadata are maintained so predictions can be associated with the model that generated them.
+
+Validation
+
+Data and model inputs are validated before being used downstream.
+
+Maintainability
+
+The backend is organized into independent modules so individual components can be modified without rewriting the entire application.
+
+Testability
+
+API endpoints can be tested independently of the frontend.
+
+
+29. Security Considerations
+
+Database credentials and other sensitive configuration values should not be hard-coded into source code.
+
+The project separates application configuration from source-code logic and avoids committing database credentials to GitHub.
+
+Production deployments should additionally use:
+
+* Environment variables or secret-management services.
+* Restricted database permissions.
+* HTTPS.
+* Authentication and authorization where appropriate.
+* Secure production configuration.
+* Logging and monitoring.
+
+
+30. Current Backend Architecture Summary
+
+The complete backend architecture can be summarized as:
+
+                    ┌─────────────────────┐
+                    │     yfinance        │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    ETL / Scheduler  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     PostgreSQL      │
+                    │      stockdb        │
+                    └──────────┬──────────┘
+                               │
+                ┌──────────────┴──────────────┐
+                │                             │
+                ▼                             ▼
+       ┌─────────────────┐          ┌────────────────────┐
+       │ Analytics API   │          │ Feature Engineering│
+       └────────┬────────┘          └─────────┬──────────┘
+                │                             │
+                │                             ▼
+                │                    ┌────────────────────┐
+                │                    │ ML Models          │
+                │                    │ RF / XGBoost       │
+                │                    └─────────┬──────────┘
+                │                              │
+                │                              ▼
+                │                    ┌────────────────────┐
+                │                    │ Model Registry     │
+                │                    └─────────┬──────────┘
+                │                              │
+                └──────────────┬───────────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      FastAPI        │
+                    │       Backend       │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Next.js Dashboard │
+                    └─────────────────────┘
+
+
+31. Future Backend Improvements
+
+Potential future improvements include:
+
+* Authentication and authorization.
+* Production deployment.
+* API rate limiting.
+* Structured application logging.
+* Automated backend tests.
+* Expanded API monitoring.
+* Improved model monitoring.
+* Automated model-performance tracking.
+* Additional financial data sources.
+* More advanced feature engineering.
+* Additional time-series models.
+* LSTM or other deep-learning experiments.
+* Improved confidence calibration.
+* Automated model retraining and validation.
+* Cloud deployment using AWS infrastructure.
+
+These improvements are intentionally separated from the current portfolio implementation so that the existing platform remains understandable, testable, and maintainable.
+
+
+32. Portfolio Project Perspective
+
+The backend demonstrates an end-to-end data-science engineering workflow:
+
+Data Acquisition
+      ↓
+ETL
+      ↓
+Data Storage
+      ↓
+Data Validation
+      ↓
+Feature Engineering
+      ↓
+Machine Learning
+      ↓
+Model Evaluation
+      ↓
+Model Registry
+      ↓
+Prediction API
+      ↓
+Dashboard
+
+This architecture demonstrates the integration of:
+
+* Python.
+* SQL.
+* PostgreSQL.
+* FastAPI.
+* Pandas.
+* Scikit-learn.
+* XGBoost.
+* Financial time-series data.
+* Machine-learning evaluation.
+* REST APIs.
+* Scheduled data pipelines.
+* Next.js visualization.
+
+The backend therefore serves as the central integration layer connecting the data-engineering, machine-learning, and frontend components of the Financial Market Analytics Platform.
