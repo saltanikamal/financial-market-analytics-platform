@@ -669,6 +669,7 @@ The repository includes additional documentation for the major components of the
 | [ML Pipeline](backend/docs/ml-pipeline.md) | Feature engineering, model training, validation, and evaluation |
 | [Backend Architecture](backend/docs/system-architecture.md) | Backend-specific architecture and data flow |
 | [Backend README](backend/README.md) | Backend setup and development instructions |
+| [Frontend Documentation](frontend/docs/frontend.md) | Comprehensive Next.js, React, TypeScript, dashboard, visualization, and frontend architecture documentation |
 | [Frontend README](frontend/README.md) | Next.js dashboard setup and development instructions |
 
 ---
