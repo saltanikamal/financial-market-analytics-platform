@@ -10,6 +10,7 @@ An end-to-end financial data science application that integrates automated marke
 
 The platform collects historical market data through an automated ETL pipeline, validates and stores the data in PostgreSQL, generates technical and statistical features, trains machine-learning classification models using chronological walk-forward validation, registers model artifacts and evaluation metadata, and exposes analytical results through a FastAPI backend and interactive Next.js dashboard.
 
+![Financial Market Analytics Platform Dashboard](docs/images/dashboard-hero.png)
 ### Portfolio Highlights
 
 - **Data Engineering:** Automated ETL, validation, scheduled ingestion, and PostgreSQL persistence.
