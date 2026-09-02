@@ -101,8 +101,7 @@ The data-ingestion pipeline supports a 30-symbol universe of stocks and ETFs:
 | WMT | Walmart |
 | XOM | Exxon Mobil |
 
-The platform supports analysis across the 30-symbol market-data universe, with AAPL, MSFT, NVDA, and SPY currently serving as the primary symbols for the machine-learning workflow and dashboard watchlist.
-
+The platform supports a 30-symbol market-data universe, while AAPL, MSFT, NVDA, and SPY form the primary dashboard watchlist. The machine-learning infrastructure also supports model artifacts across the broader market-data universe.
 ---
 
 ## Dashboard
@@ -147,11 +146,11 @@ This provides a simple way to compare a traditional technical-indicator signal w
 
 For the multiclass prediction, the dashboard displays the model's probability distribution across:
 
-| Class | Interpretation |
+| Class | Signal |
 |---|---|
-| Bearish | SELL |
-| Neutral | HOLD |
-| Bullish | BUY |
+| 0 | SELL |
+| 1 | HOLD |
+| 2 | BUY |
 
 The probability bars provide a visual representation of the model's relative confidence across the three classes.
 
